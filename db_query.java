@@ -1,7 +1,4 @@
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 
 public class db_query {
@@ -20,12 +17,16 @@ public class db_query {
         return rs;
     }
 
-    public static void printRs(ResultSet rs){
-        //working to setup print method to show data
-
-        /*while(rs.next()){
-            System.out.println(rs.getString("columnName") + " " + rs.getString("columnName") +....);
+    public static void printRs(ResultSet rs) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int CC = rsmd.getColumnCount();
+        while (rs.next()) {
+            for (int i = 1; i <= CC; i++) {
+                if (i > 1) System.out.print(",  ");
+                String columnValue = rs.getString(i);
+                System.out.print(rsmd.getColumnName(i) + ": " + columnValue );
+            }
+            System.out.println("");
         }
-        */
     }
 }
