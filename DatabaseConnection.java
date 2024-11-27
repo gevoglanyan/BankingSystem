@@ -14,7 +14,7 @@ public class DatabaseConnection {
     }
 
 
-    private static final String URL = "jdbc:mysql://database-1.chiwu04ostol.us-west-2.rds.amazonaws.com";
+    private static final String URL = "jdbc:mysql://database-1.chiwu04ostol.us-west-2.rds.amazonaws.com/BankSystem";
     private static final String USER = "admin";
     private static final String PASSWORD = "comp440project";
 
