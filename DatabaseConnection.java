@@ -3,8 +3,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    // jdbc:mysql://some-instance.rds.amazonaws.com/<database_name>
-
     static {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");

@@ -17,6 +17,21 @@ public class db_query {
         return rs;
     }
 
+    public static ResultSet getCustomerByAddress(String address) throws SQLException {
+        Connection conn = DatabaseConnection.getConnection();
+        ResultSet rs = null;
+        Statement stmt = conn.createStatement();
+        String sql = "select * from customer where email like '" + address + "'";
+        try{
+            rs = stmt.executeQuery(sql);
+            System.out.println("Query Successful");
+        }catch (Exception e) {
+            System.out.println("Error with Address: " + e.getMessage());
+        }
+        return rs;
+
+    }
+
     public static void printRs(ResultSet rs) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();
         int CC = rsmd.getColumnCount();
@@ -29,4 +44,7 @@ public class db_query {
             System.out.println("");
         }
     }
+
+
+
 }

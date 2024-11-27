@@ -14,6 +14,10 @@ public class DatabaseConnectionTester {
             ResultSet rs = db_query.customerQuery1("professor1@gmail.com");
             db_query.printRs(rs);
 
+            ResultSet rs2 = db_query.getCustomerByAddress("hogwarts");
+            db_query.printRs(rs2);
+
+
         } catch (Exception e) {
             System.out.println("Error connecting to database: " + e.getMessage());
         }

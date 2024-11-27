@@ -1,0 +1,6 @@
+public class DatabaseHandler {
+
+    DatabaseHandler(){
+
+    }
+}
