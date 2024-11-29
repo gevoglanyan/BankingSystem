@@ -1,4 +1,3 @@
-
 import javax.xml.transform.Result;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -6,40 +5,43 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+@SuppressWarnings("unused")
 public class DatabaseConnectionTester {
 
     public static void main(String[] args) throws SQLException {
         try{
-            Connection connection = DatabaseConnection.getConnection();
-            System.out.println("Connected to database");
+            Connection conn = DatabaseConnection.getConnection();
+            System.out.println("Connected to Database");
 
-//            ResultSet rs = db_query.customerQuery1("professor1@gmail.com")
-//            db_query.printRs(rs);
-//
-//            ResultSet rs2 = db_query.getCustomerByAddress("hogwarts");
-//            db_query.printRs(rs2);
+            /* 
 
-//            int rs3 = db_query.createCustomerQuery("Maxwell","Kozlov","CSUN","maxwell.kozlov.595@my.csun.edu","818-523-6396");
-//            Boolean status = db_query.checkIfEmailExists("maxwell.kozlov.55@my.csun.edu");ed
-//            System.out.println(status);
+            ResultSet rs = DatabaseQuery.customerQuery1("professor1@gmail.com")
+            DatabaseQuery.printRs(rs);
 
-//            ResultSet rs4 = db_query.transactionsRelatedToAccount(1);
-//            db_query.printRs(rs4);
+            ResultSet rs2 = DatabaseQuery.getCustomerByAddress("hogwarts");
+            DatabaseQuery.printRs(rs2);
 
-//                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                Date fromDate = formatter.parse("2024-11-12 00:00:00");
-//                Date toDate = formatter.parse("2024-11-30 23:59:59");
-//                ResultSet rs5 = db_query.transactionsBetweenDates(Timestamp.from(fromDate.toInstant()), Timestamp.from(toDate.toInstant()));
-//                db_query.printRs(rs5);
+            int rs3 = DatabaseQuery.createCustomerQuery("Maxwell","Kozlov","CSUN","maxwell.kozlov.595@my.csun.edu","818-523-6396");
+            Boolean status = DatabaseQuery.checkIfEmailExists("maxwell.kozlov.55@my.csun.edu");ed
+            System.out.println(status);
 
+            ResultSet rs4 = DatabaseQuery.transactionsRelatedToAccount(1);
+            DatabaseQuery.printRs(rs4);
 
-            ResultSet rs6 = db_query.getLoansFromCustomer(1);
-            db_query.printRs(rs6);
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date fromDate = formatter.parse("2024-11-12 00:00:00");
+            Date toDate = formatter.parse("2024-11-30 23:59:59");
+            ResultSet rs5 = DatabaseQuery.transactionsBetweenDates(Timestamp.from(fromDate.toInstant()), Timestamp.from(toDate.toInstant()));
+            DatabaseQuery.printRs(rs5);
 
+            ResultSet rs6 = DatabaseQuery.getLoansFromCustomer(1);
+            DatabaseQuery.printRs(rs6);
+
+            */
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error connecting to database: " + e.getMessage());
+            System.out.println("Error Connecting to Database: " + e.getMessage());
         }
     }
 

@@ -1,7 +1,11 @@
 import javax.xml.transform.Result;
 import java.sql.*;
 
-public class db_query {
+@SuppressWarnings("unused")
+
+// Changed the Name to Match Other Files
+
+public class DatabaseQuery{
 
     private static Connection conn;
 
@@ -19,12 +23,10 @@ public class db_query {
         return conn;
     }
 
+    // BUISNESS LOGIC
 
-    //
-    // DEFINED BUISNESS LOGIC
-    //
+    // CUSTOMER
 
-    //CUSTOMER
     public static ResultSet getCustomerByEmail(String email) throws SQLException {
         ResultSet rs = null;
         String sql = "SELECT * FROM customer WHERE email = ?";
@@ -53,7 +55,8 @@ public class db_query {
         return rs;
     }
 
-    //ACCOUNT
+    // ACCOUNT
+
     public static ResultSet getAccountByCustomerID(int customerID) throws SQLException {
         ResultSet rs = null;
         String sql = "SELECT * FROM account WHERE customerID = ?";
@@ -82,7 +85,8 @@ public class db_query {
         return rs;
     }
 
-    //TRANSACTIONS
+    // TRANSACTIONS
+
     public static ResultSet transactionsRelatedToAccount(int accountNumber) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM transaction WHERE senderNum = ? or recieverNum = ?";
@@ -99,6 +103,7 @@ public class db_query {
         }
         return rs;
     }
+
     public static ResultSet transactionsBetweenDates(Timestamp from, Timestamp to) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM transaction WHERE transactionDate >= ? and transactionDate <= ?";
@@ -115,7 +120,8 @@ public class db_query {
         return rs;
     }
 
-    //LOANS
+    // LOANS
+
     public static ResultSet getLoansFromCustomer(int customerID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM loan WHERE customerID = ?";
@@ -130,7 +136,9 @@ public class db_query {
         }
         return rs;
     }
-    //BRANCH
+
+    // BRANCH
+
     public static ResultSet getEmployeeFromBranch(int branchID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM employee WHERE branchID = ?";
@@ -161,6 +169,7 @@ public class db_query {
     }
 
     //EMPLOYEE
+
     public static ResultSet getEmployeeFromRole(String role) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM employee WHERE role = ?";
@@ -175,6 +184,7 @@ public class db_query {
         }
         return rs;
     }
+
     public static ResultSet getEmployeeHiredOn(String dateHired) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM employee WHERE dateHired = ?";
@@ -190,7 +200,8 @@ public class db_query {
         return rs;
     }
 
-    //ATM
+    // ATM
+
     public static ResultSet getATMFromBranch(int branchID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM atm WHERE branchID = ?";
@@ -205,6 +216,7 @@ public class db_query {
         }
         return rs;
     }
+    
     public static ResultSet getATMLessThanMaxCash() throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM atm WHERE currentCash< maxCash;";
@@ -219,7 +231,8 @@ public class db_query {
         return rs;
     }
 
-    //CARD
+    // CARD
+
     public static ResultSet getCardFromAccountID(int accountID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM card WHERE accountID = ?";
@@ -234,6 +247,7 @@ public class db_query {
         }
         return rs;
     }
+
     public static ResultSet getExpiredCard(String expDate, int accountID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM card WHERE Date(expDate) = Date(?) AND accountID = ?";
@@ -249,14 +263,8 @@ public class db_query {
         }
         return rs;
     }
-
-
-
-
-    //
+ 
     // UTILITY FUNCTIONS
-    //
-
 
     public static int createCustomerQuery(String firstName, String lastName, String address, String email, String phoneNumber) throws SQLException {
         int resultCode = -1;
@@ -280,6 +288,7 @@ public class db_query {
         ResultSet rs;
         boolean exists = false;
         String sql = "SELECT count(*) FROM customer WHERE email = ?";
+        
         try{
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, email);
@@ -292,6 +301,7 @@ public class db_query {
         }
         return exists;
     }
+
     public static int createTransaction(int senderNum, int recieverNum, String transactionDate, int amount, String transactionType) throws SQLException {
         int rs = -1;
         String sql = String.format("INSERT INTO transaction (senderNum, recieverNum, transactionDate, amount, transactionType) VALUES (%o, %o, '%s', %o, '%s')", senderNum, recieverNum, transactionDate, amount, transactionType);
@@ -306,8 +316,8 @@ public class db_query {
         return rs;
     }
 
-
     //UPDATE
+
     public static int updateCustomer(String firstName, String lastName, String address, String email, String phoneNumber, int customerID) throws SQLException {
         int rs = -1;
         String sql = String.format("UPDATE customer SET firstName = '%s', lastName = '%s', address = '%s', email = '%s', phoneNumber = '%s' Where customerID = %o", firstName, lastName, address, email, phoneNumber, customerID);
@@ -322,6 +332,7 @@ public class db_query {
         }
         return rs;
     }
+
     public static int updateLoanStatus(int loanStatus, int loanID, int customerID) throws SQLException {
         int rs = -1;
         String sql = String.format("UPDATE loan SET loanStatus = '%o' WHERE loanID = %o AND customerID = %o", loanStatus, loanID, customerID );
@@ -337,21 +348,20 @@ public class db_query {
         return rs;
     }
 
-
-//public static int createAccountForCustomer(String firstName, String lastName){
-//        int resultCode = -1;
-//        String sql = String.format("INSERT INTO customer (firstName, lastName, Address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
-//        System.out.println(sql);
-//        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//            resultCode = pstmt.executeUpdate();
-//            System.out.println("Query Successful");
-//        } catch (SQLException e) {
-//            System.err.println("Error with creating customer query: " + e.getMessage());
-//        }
-//        return resultCode;
-//    }
-
-
+    /* 
+    public static int createAccountForCustomer(String firstName, String lastName){
+        int resultCode = -1;
+        String sql = String.format("INSERT INTO customer (firstName, lastName, Address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
+        System.out.println(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            resultCode = pstmt.executeUpdate();
+            System.out.println("Query Successful");
+        } catch (SQLException e) {
+            System.err.println("Error with creating customer query: " + e.getMessage());
+       }
+       return resultCode;
+    }
+    */
 
     public static void printRs(ResultSet rs) throws SQLException {
         if (rs != null) {
@@ -380,7 +390,4 @@ public class db_query {
             System.err.println("Error closing database connection: " + e.getMessage());
         }
     }
-
-
-
 }
