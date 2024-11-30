@@ -86,7 +86,7 @@ public class DatabaseQuery{
 
     public static ResultSet transactionsRelatedToAccount(int accountNumber) throws SQLException{
         ResultSet rs = null;
-        String sql = "SELECT * FROM transaction WHERE senderNum = ? or recieverNum = ?";
+        String sql = "SELECT * FROM transaction WHERE senderNum = ? or receiverNum = ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, accountNumber);
@@ -270,7 +270,7 @@ public class DatabaseQuery{
             System.err.println("Customer already exists with email: " + email);
             return -1;
         }
-        String sql = String.format("INSERT INTO customer (firstName, lastName, Address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
+        String sql = String.format("INSERT INTO customer (firstName, lastName, address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             resultCode = pstmt.executeUpdate();
@@ -301,7 +301,7 @@ public class DatabaseQuery{
 
     public static int createTransaction(int senderNum, int recieverNum, String transactionDate, int amount, String transactionType) throws SQLException {
         int rs = -1;
-        String sql = String.format("INSERT INTO transaction (senderNum, recieverNum, transactionDate, amount, transactionType) VALUES (%o, %o, '%s', %o, '%s')", senderNum, recieverNum, transactionDate, amount, transactionType);
+        String sql = String.format("INSERT INTO transaction (senderNum, receiverNum, transactionDate, amount, transactionType) VALUES (%o, %o, '%s', %o, '%s')", senderNum, recieverNum, transactionDate, amount, transactionType);
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.executeUpdate();

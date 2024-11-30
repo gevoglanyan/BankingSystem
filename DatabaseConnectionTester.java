@@ -39,6 +39,17 @@ public class DatabaseConnectionTester {
 
             */
 
+//            Customer customer = new Customer(DatabaseQuery.getCustomerByEmail("professor1@gmail.com"));
+//            System.out.println(customer);
+
+//            Employee employee = new Employee(DatabaseQuery.getEmployeeFromBranch(1));
+//            System.out.println(employee);
+
+//            Loan loan = new Loan(DatabaseQuery.getLoansFromCustomer(1));
+//            System.out.println(loan);
+
+            Transaction transaction = new Transaction(DatabaseQuery.transactionsRelatedToAccount(1));
+            System.out.println(transaction);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error Connecting to Database: " + e.getMessage());
