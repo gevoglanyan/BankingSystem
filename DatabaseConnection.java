@@ -16,8 +16,6 @@ public class DatabaseConnection {
         return connection;
     }
 
-    // Need to Add This For Interface
-
     public static void closeConnection(Connection conn) {
         try {
             if (conn != null && !conn.isClosed()) {

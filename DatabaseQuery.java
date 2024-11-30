@@ -1,10 +1,7 @@
+import javax.xml.transform.Result;
 import java.sql.*;
-import java.util.Objects;
 
 @SuppressWarnings("unused")
-
-// Changed the Name to Match Other Files
-
 public class DatabaseQuery{
 
     private static Connection conn;
@@ -266,7 +263,7 @@ public class DatabaseQuery{
  
     // UTILITY FUNCTIONS
 
-    public static int createCustomer(String firstName, String lastName, String address, String email, String phoneNumber) throws SQLException {
+    public static int createCustomerQuery(String firstName, String lastName, String address, String email, String phoneNumber) throws SQLException {
         int resultCode = -1;
         boolean exists = checkIfEmailExists(email);
         if (exists) {
@@ -307,45 +304,11 @@ public class DatabaseQuery{
         String sql = String.format("INSERT INTO transaction (senderNum, recieverNum, transactionDate, amount, transactionType) VALUES (%o, %o, '%s', %o, '%s')", senderNum, recieverNum, transactionDate, amount, transactionType);
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeUpdate();
+            pstmt.executeUpdate();
+            rs = 1;
             System.out.println("Query Successful");
         } catch (SQLException e) {
             System.err.println("Error with creating transaction query: " + e.getMessage());
-        }
-        return rs;
-    }
-
-    public static int createAccount(int accountType, int customerIDFK) throws SQLException{
-        int rs = -1;
-        int hash = Math.abs(Objects.hash(customerIDFK,accountType * 123456789));
-        String tenDigitHash = String.format("%010d", hash % 10_000_000_000L);
-        int accountNum = Integer.parseInt(tenDigitHash);
-        String sql = "INSERT into account (accountNum, accountType, customerID) VALUES (?, ?, ?)";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, accountNum);
-            pstmt.setInt(2, accountType);
-            pstmt.setInt(3, customerIDFK);
-            rs = pstmt.executeUpdate();
-            System.out.println("Create account successful");
-        } catch (SQLException e) {
-            System.err.println("Error with creating account query: " + e.getMessage());
-        }
-        return rs;
-
-    }
-
-    public static ResultSet getCustomerByID(int customerID) throws SQLException{
-        ResultSet rs = null;
-        String sql = "SELECT * FROM customer WHERE customerID = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, customerID);
-            rs = pstmt.executeQuery();
-            System.out.println("Query Successful");
-        } catch (SQLException e) {
-            System.err.println("Error with Get Customer By ID Query: " + e.getMessage());
-            System.err.println(e.getErrorCode());
         }
         return rs;
     }
@@ -357,7 +320,8 @@ public class DatabaseQuery{
         String sql = String.format("UPDATE customer SET firstName = '%s', lastName = '%s', address = '%s', email = '%s', phoneNumber = '%s' Where customerID = %o", firstName, lastName, address, email, phoneNumber, customerID);
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeUpdate();
+            pstmt.executeUpdate();
+            rs = 1;
             System.out.println("Query Successful");
         } catch (SQLException e) {
             System.err.println("Error with Updating customer query: " + e.getMessage());
@@ -371,7 +335,8 @@ public class DatabaseQuery{
         String sql = String.format("UPDATE loan SET loanStatus = '%o' WHERE loanID = %o AND customerID = %o", loanStatus, loanID, customerID );
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeUpdate();
+            pstmt.executeUpdate();
+            rs = 1;
             System.out.println("Query Successful");
         } catch (SQLException e) {
             System.err.println("Error with Updating Loan query: " + e.getMessage());
@@ -410,6 +375,23 @@ public class DatabaseQuery{
         } else {
             System.out.println("No results to display.");
         }
+    }
+
+    public static ResultSet executeCustomQuery(String query) throws SQLException {
+        Statement stmt = null;
+        ResultSet rs = null;
+    
+        try {
+            stmt = conn.createStatement();
+    
+            rs = stmt.executeQuery(query);
+            System.out.println("Custom query executed successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error executing custom query: " + e.getMessage());
+            throw e;
+        }
+    
+        return rs;
     }
 
     public static void closeConnection() {

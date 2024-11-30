@@ -44,5 +44,4 @@ public class DatabaseConnectionTester {
             System.out.println("Error Connecting to Database: " + e.getMessage());
         }
     }
-
 }

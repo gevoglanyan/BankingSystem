@@ -1,16 +1,12 @@
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
-@SuppressWarnings("unused")
 public class Interface extends JFrame {
 
     private JTabbedPane tabbedPane;
@@ -18,7 +14,7 @@ public class Interface extends JFrame {
 
     public Interface() {
         setTitle("Banking System Database");
-        setSize(700, 500);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -35,37 +31,31 @@ public class Interface extends JFrame {
         initTransactionPanel();
         initLoanPanel();
         initBranchPanel();
+        initATMPanel();
+        initCardPanel();
+        initAdminPanel();
 
         resultArea = new JTextArea();
         resultArea.setEditable(false);
         resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scrollPane = new JScrollPane(resultArea);
-        scrollPane.setPreferredSize(new Dimension(700, 150));
 
-        setLayout(new BorderLayout(5, 5));
+        setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
         add(scrollPane, BorderLayout.SOUTH);
     }
 
     private JPanel createGridBagPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         return panel;
     }
 
     private JButton createSmallButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.PLAIN, 11));
-        btn.setMargin(new Insets(2, 5, 2, 5));
-        return btn;
+        return new JButton(text);
     }
 
     private JTextField createTextField() {
-        JTextField field = new JTextField(15);
-        field.setFont(new Font("Arial", Font.PLAIN, 11));
-        return field;
+        return new JTextField(15);
     }
 
     private void initCustomerPanel() {
@@ -76,7 +66,7 @@ public class Interface extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         customerPanel.add(new JLabel("Email:"), gbc);
-        
+
         gbc.gridx = 1;
         JTextField emailField = createTextField();
         customerPanel.add(emailField, gbc);
@@ -93,42 +83,6 @@ public class Interface extends JFrame {
         });
         customerPanel.add(getByEmailBtn, gbc);
 
-        String[] labels = {"First Name:", "Last Name:", "Address:", "Phone:", "Email:"};
-        JTextField[] fields = new JTextField[labels.length];
-
-        for (int i = 0; i < labels.length; i++) {
-            gbc.gridx = 0;
-            gbc.gridy = i + 1;
-            customerPanel.add(new JLabel(labels[i]), gbc);
-
-            gbc.gridx = 1;
-            fields[i] = createTextField();
-            customerPanel.add(fields[i], gbc);
-        }
-
-        gbc.gridx = 2;
-        gbc.gridy = labels.length + 1;
-        JButton createCustomerBtn = createSmallButton("Create Customer");
-        createCustomerBtn.addActionListener(e -> {
-            try {
-                int result = DatabaseQuery.createCustomerQuery(
-                    fields[0].getText(), 
-                    fields[1].getText(), 
-                    fields[2].getText(), 
-                    fields[4].getText(), 
-                    fields[3].getText()
-                );
-                if (result > 0) {
-                    resultArea.setText("Customer created successfully!");
-                } else {
-                    resultArea.setText("Failed to create customer.");
-                }
-            } catch (SQLException ex) {
-                displayError("Error creating customer", ex);
-            }
-        });
-        customerPanel.add(createCustomerBtn, gbc);
-
         tabbedPane.addTab("Customers", customerPanel);
     }
 
@@ -140,44 +94,23 @@ public class Interface extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         accountPanel.add(new JLabel("Customer ID:"), gbc);
-        
+
         gbc.gridx = 1;
         JTextField customerIDField = createTextField();
         accountPanel.add(customerIDField, gbc);
 
         gbc.gridx = 2;
-        JButton getAccountBtn = createSmallButton("Get Account");
+        JButton getAccountBtn = createSmallButton("Get Accounts");
         getAccountBtn.addActionListener(e -> {
             try {
                 int customerID = Integer.parseInt(customerIDField.getText());
                 ResultSet rs = DatabaseQuery.getAccountByCustomerID(customerID);
                 displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
-                displayError("Error retrieving account", ex);
-            }
-        });
-        accountPanel.add(getAccountBtn, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        accountPanel.add(new JLabel("Min Balance:"), gbc);
-        
-        gbc.gridx = 1;
-        JTextField balanceField = createTextField();
-        accountPanel.add(balanceField, gbc);
-
-        gbc.gridx = 2;
-        JButton getByBalanceBtn = createSmallButton("Accounts Above Balance");
-        getByBalanceBtn.addActionListener(e -> {
-            try {
-                int balance = Integer.parseInt(balanceField.getText());
-                ResultSet rs = DatabaseQuery.getAccountByBalance(balance);
-                displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
+            } catch (SQLException | NumberFormatException ex) {
                 displayError("Error retrieving accounts", ex);
             }
         });
-        accountPanel.add(getByBalanceBtn, gbc);
+        accountPanel.add(getAccountBtn, gbc);
 
         tabbedPane.addTab("Accounts", accountPanel);
     }
@@ -190,7 +123,7 @@ public class Interface extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         transactionPanel.add(new JLabel("Account Number:"), gbc);
-        
+
         gbc.gridx = 1;
         JTextField accountNumField = createTextField();
         transactionPanel.add(accountNumField, gbc);
@@ -202,7 +135,7 @@ public class Interface extends JFrame {
                 int accountNum = Integer.parseInt(accountNumField.getText());
                 ResultSet rs = DatabaseQuery.transactionsRelatedToAccount(accountNum);
                 displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
+            } catch (SQLException | NumberFormatException ex) {
                 displayError("Error retrieving transactions", ex);
             }
         });
@@ -219,19 +152,19 @@ public class Interface extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         loanPanel.add(new JLabel("Customer ID:"), gbc);
-        
+
         gbc.gridx = 1;
-        JTextField customerIDLoanField = createTextField();
-        loanPanel.add(customerIDLoanField, gbc);
+        JTextField customerIDField = createTextField();
+        loanPanel.add(customerIDField, gbc);
 
         gbc.gridx = 2;
         JButton getLoansBtn = createSmallButton("Get Loans");
         getLoansBtn.addActionListener(e -> {
             try {
-                int customerID = Integer.parseInt(customerIDLoanField.getText());
+                int customerID = Integer.parseInt(customerIDField.getText());
                 ResultSet rs = DatabaseQuery.getLoansFromCustomer(customerID);
                 displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
+            } catch (SQLException | NumberFormatException ex) {
                 displayError("Error retrieving loans", ex);
             }
         });
@@ -248,7 +181,7 @@ public class Interface extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         branchPanel.add(new JLabel("Branch ID:"), gbc);
-        
+
         gbc.gridx = 1;
         JTextField branchIDField = createTextField();
         branchPanel.add(branchIDField, gbc);
@@ -260,24 +193,111 @@ public class Interface extends JFrame {
                 int branchID = Integer.parseInt(branchIDField.getText());
                 ResultSet rs = DatabaseQuery.getEmployeeFromBranch(branchID);
                 displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
+            } catch (SQLException | NumberFormatException ex) {
                 displayError("Error retrieving employees", ex);
             }
         });
         branchPanel.add(getEmployeesBtn, gbc);
 
-        tabbedPane.addTab("Branch", branchPanel);
+        tabbedPane.addTab("Branches", branchPanel);
+    }
+
+    private void initATMPanel() {
+        JPanel atmPanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        atmPanel.add(new JLabel("Branch ID:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField branchIDField = createTextField();
+        atmPanel.add(branchIDField, gbc);
+
+        gbc.gridx = 2;
+        JButton getATMsBtn = createSmallButton("Get ATMs");
+        getATMsBtn.addActionListener(e -> {
+            try {
+                int branchID = Integer.parseInt(branchIDField.getText());
+                ResultSet rs = DatabaseQuery.getATMFromBranch(branchID);
+                displayResultSet(rs);
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error retrieving ATMs", ex);
+            }
+        });
+        atmPanel.add(getATMsBtn, gbc);
+
+        tabbedPane.addTab("ATMs", atmPanel);
+    }
+
+    private void initCardPanel() {
+        JPanel cardPanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        cardPanel.add(new JLabel("Account ID:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField accountIDField = createTextField();
+        cardPanel.add(accountIDField, gbc);
+
+        gbc.gridx = 2;
+        JButton getCardsBtn = createSmallButton("Get Cards");
+        getCardsBtn.addActionListener(e -> {
+            try {
+                int accountID = Integer.parseInt(accountIDField.getText());
+                ResultSet rs = DatabaseQuery.getCardFromAccountID(accountID);
+                displayResultSet(rs);
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error retrieving cards", ex);
+            }
+        });
+        cardPanel.add(getCardsBtn, gbc);
+
+        tabbedPane.addTab("Cards", cardPanel);
+    }
+
+    private void initAdminPanel() {
+        JPanel adminPanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        adminPanel.add(new JLabel("Custom Query:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField queryField = createTextField();
+        adminPanel.add(queryField, gbc);
+
+        gbc.gridx = 2;
+        JButton executeQueryBtn = createSmallButton("Execute Query");
+        executeQueryBtn.addActionListener(e -> {
+            try {
+                String query = queryField.getText();
+                ResultSet rs = DatabaseQuery.executeCustomQuery(query); 
+                displayResultSet(rs);
+            } catch (SQLException ex) {
+                displayError("Error executing query", ex);
+            }
+        });
+        adminPanel.add(executeQueryBtn, gbc);
+
+        tabbedPane.addTab("Admin", adminPanel);
     }
 
     private void displayResultSet(ResultSet rs) {
         try {
-            resultArea.setText("");
-
-            if (rs == null || !rs.isBeforeFirst()) {
+            resultArea.setText(""); 
+    
+            if (rs == null) {
                 resultArea.setText("No Results Found.");
                 return;
             }
-
+    
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
@@ -286,19 +306,35 @@ public class Interface extends JFrame {
                 header.append(String.format("%-20s", metaData.getColumnName(i)));
             }
             resultArea.append(header.toString() + "\n");
-            resultArea.append("-".repeat(header.length()) + "\n");
-
+    
+            StringBuilder separator = new StringBuilder();
+            for (int i = 1; i <= columnCount; i++) {
+                separator.append("--------------------");
+            }
+            resultArea.append(separator.toString() + "\n");
+    
+            boolean hasRows = false;
+            
             while (rs.next()) {
+                hasRows = true;
                 StringBuilder row = new StringBuilder();
                 for (int i = 1; i <= columnCount; i++) {
-                    row.append(String.format("%-20s", rs.getString(i)));
+                    String columnValue = rs.getString(i);
+                    row.append(String.format("%-20s", columnValue != null ? columnValue : "NULL"));
                 }
                 resultArea.append(row.toString() + "\n");
             }
+    
+            if (!hasRows) {
+                resultArea.setText("No Results Found.");
+            }
         } catch (SQLException e) {
-            displayError("Error displaying results", e);
+            displayError("SQL Exception while displaying results: " + e.getMessage(), e);
+        } catch (Exception e) {
+            displayError("Unexpected error: " + e.getMessage(), e);
         }
     }
+    
 
     private void displayError(String message, Exception e) {
         resultArea.setText(message + "\n" + e.getMessage());
@@ -309,10 +345,10 @@ public class Interface extends JFrame {
         SwingUtilities.invokeLater(() -> {
             try {
                 Connection conn = DatabaseConnection.getConnection();
-                
+
                 Interface frame = new Interface();
                 frame.setVisible(true);
-                
+
                 frame.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent e) {
@@ -320,14 +356,14 @@ public class Interface extends JFrame {
                         System.exit(0);
                     }
                 });
-                
+
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, 
-                    "Failed to connect to database:\n" + e.getMessage(), 
-                    "Database Connection Error", 
-                    JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                        "Failed to connect to database:\n" + e.getMessage(),
+                        "Database Connection Error",
+                        JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
         });
-    }   
+    }
 }
