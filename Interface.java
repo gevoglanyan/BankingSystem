@@ -14,7 +14,7 @@ public class Interface extends JFrame {
 
     public Interface() {
         setTitle("Banking System Database");
-        setSize(800, 600);
+        setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -26,6 +26,9 @@ public class Interface extends JFrame {
 
         tabbedPane = new JTabbedPane();
 
+        // Different Panels 
+
+        initCreateCustomerPanel();
         initCustomerPanel();
         initAccountPanel();
         initTransactionPanel();
@@ -86,6 +89,99 @@ public class Interface extends JFrame {
         tabbedPane.addTab("Customers", customerPanel);
     }
 
+    private void initCreateCustomerPanel() {
+        JPanel createCustomerPanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+
+        Dimension textFieldSize = new Dimension(300, 25);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        createCustomerPanel.add(new JLabel("First Name:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField firstNameField = createTextField();
+        firstNameField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(firstNameField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        createCustomerPanel.add(new JLabel("Last Name:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField lastNameField = createTextField();
+        lastNameField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(lastNameField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        createCustomerPanel.add(new JLabel("Address:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField addressField = createTextField();
+        addressField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(addressField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        createCustomerPanel.add(new JLabel("Email:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField emailField = createTextField();
+        emailField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(emailField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        createCustomerPanel.add(new JLabel("Phone Number:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField phoneNumberField = createTextField();
+        phoneNumberField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(phoneNumberField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        
+        JButton submitButton = new JButton("Create Customer");
+        
+        submitButton.addActionListener(e -> {
+            String firstName = firstNameField.getText();
+            String lastName = lastNameField.getText();
+            String address = addressField.getText();
+            String email = emailField.getText();
+            String phoneNumber = phoneNumberField.getText();
+
+            // Resets Fields After Account Creation
+    
+            try {
+                int result = DatabaseQuery.createCustomerQuery(firstName, lastName, address, email, phoneNumber);
+                if (result != -1) {
+                    resultArea.setText("Customer Created Successfully!");
+                    firstNameField.setText("");
+                    lastNameField.setText("");
+                    addressField.setText("");
+                    emailField.setText("");
+                    phoneNumberField.setText("");
+                } else {
+                    resultArea.setText("Failed to Create Customer. Email Might Already Exist.");
+                }
+            } catch (SQLException ex) {
+                displayError("Error Creating Customer", ex);
+                firstNameField.setText("");
+                lastNameField.setText("");
+                addressField.setText("");
+                emailField.setText("");
+                phoneNumberField.setText("");
+            }
+        });
+        createCustomerPanel.add(submitButton, gbc);
+    
+        tabbedPane.addTab("Create Customer", createCustomerPanel);
+    }
+    
     private void initAccountPanel() {
         JPanel accountPanel = createGridBagPanel();
         GridBagConstraints gbc = new GridBagConstraints();
@@ -107,7 +203,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.getAccountByCustomerID(customerID);
                 displayResultSet(rs);
             } catch (SQLException | NumberFormatException ex) {
-                displayError("Error retrieving accounts", ex);
+                displayError("Error Retrieving Accounts", ex);
             }
         });
         accountPanel.add(getAccountBtn, gbc);
@@ -136,7 +232,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.transactionsRelatedToAccount(accountNum);
                 displayResultSet(rs);
             } catch (SQLException | NumberFormatException ex) {
-                displayError("Error retrieving transactions", ex);
+                displayError("Error Retrieving Transactions", ex);
             }
         });
         transactionPanel.add(getTransactionsBtn, gbc);
@@ -165,7 +261,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.getLoansFromCustomer(customerID);
                 displayResultSet(rs);
             } catch (SQLException | NumberFormatException ex) {
-                displayError("Error retrieving loans", ex);
+                displayError("Error Retrieving Loans", ex);
             }
         });
         loanPanel.add(getLoansBtn, gbc);
@@ -194,7 +290,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.getEmployeeFromBranch(branchID);
                 displayResultSet(rs);
             } catch (SQLException | NumberFormatException ex) {
-                displayError("Error retrieving employees", ex);
+                displayError("Error Retrieving Employees", ex);
             }
         });
         branchPanel.add(getEmployeesBtn, gbc);
@@ -223,7 +319,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.getATMFromBranch(branchID);
                 displayResultSet(rs);
             } catch (SQLException | NumberFormatException ex) {
-                displayError("Error retrieving ATMs", ex);
+                displayError("Error Retrieving ATMs", ex);
             }
         });
         atmPanel.add(getATMsBtn, gbc);
@@ -252,7 +348,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.getCardFromAccountID(accountID);
                 displayResultSet(rs);
             } catch (SQLException | NumberFormatException ex) {
-                displayError("Error retrieving cards", ex);
+                displayError("Error Retrieving Cards", ex);
             }
         });
         cardPanel.add(getCardsBtn, gbc);
@@ -281,7 +377,7 @@ public class Interface extends JFrame {
                 ResultSet rs = DatabaseQuery.executeCustomQuery(query); 
                 displayResultSet(rs);
             } catch (SQLException ex) {
-                displayError("Error executing query", ex);
+                displayError("Error Executing Query", ex);
             }
         });
         adminPanel.add(executeQueryBtn, gbc);
@@ -329,13 +425,12 @@ public class Interface extends JFrame {
                 resultArea.setText("No Results Found.");
             }
         } catch (SQLException e) {
-            displayError("SQL Exception while displaying results: " + e.getMessage(), e);
+            displayError("SQL Exception While Displaying Results: " + e.getMessage(), e);
         } catch (Exception e) {
-            displayError("Unexpected error: " + e.getMessage(), e);
+            displayError("Unexpected Error: " + e.getMessage(), e);
         }
     }
     
-
     private void displayError(String message, Exception e) {
         resultArea.setText(message + "\n" + e.getMessage());
         e.printStackTrace();
@@ -359,7 +454,7 @@ public class Interface extends JFrame {
 
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null,
-                        "Failed to connect to database:\n" + e.getMessage(),
+                        "Failed to Connect to Database:\n" + e.getMessage(),
                         "Database Connection Error",
                         JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
