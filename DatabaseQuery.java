@@ -1,5 +1,6 @@
 import javax.xml.transform.Result;
 import java.sql.*;
+import java.time.Instant;
 
 @SuppressWarnings("unused")
 public class DatabaseQuery{
@@ -70,7 +71,7 @@ public class DatabaseQuery{
 
     public static ResultSet getAccountByBalance(int balance) throws SQLException {
         ResultSet rs = null;
-        String sql = "SELECT * FROM account WHERE balance > ?";
+        String sql = "SELECT * FROM account WHERE balance >= ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, balance);
@@ -79,6 +80,37 @@ public class DatabaseQuery{
         } catch (SQLException e) {
             System.err.println("Error with Account Query: " + e.getMessage());
         }
+        return rs;
+    }
+
+    public static boolean getAccountHasBalance(int accountID, int balance) throws SQLException {
+        boolean exists = false;
+        ResultSet rs = null;
+        String sql = "SELECT count(*) FROM account WHERE balance >= ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, balance);
+            rs = pstmt.executeQuery();
+            if(rs.next()) {
+                exists = rs.getInt(1) > 0;
+            }
+            System.out.println("Query Successful");
+        } catch (SQLException e) {
+            System.err.println("Error with Account Query: " + e.getMessage());
+        }
+        return exists;
+    }
+
+    public static ResultSet closeAccount(int accountID) throws SQLException {
+        ResultSet rs = null;
+        // check if the account has a pending loan
+
+        // check if the account has a negative balance
+        return rs;
+    }
+
+    public static ResultSet applyInterest(int accountID, float interestRate) throws SQLException {
+        ResultSet rs = null;
         return rs;
     }
 
@@ -117,6 +149,34 @@ public class DatabaseQuery{
         return rs;
     }
 
+    public static int createTransaction(int senderNum, int receiverNum, int amount, String transactionType) throws SQLException{
+        int resultCode = 0;
+        String sql = "INSERT INTO transaction (senderNum, receiverNum, amount, transactionType, transactionDate) VALUES (?, ?, ?, ?, ?)";
+        if(!getAccountHasBalance(senderNum, amount)) {
+            return -1;
+        }
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, senderNum);
+            pstmt.setInt(2, receiverNum);
+            pstmt.setInt(3, amount);
+            pstmt.setString(4, transactionType);
+            pstmt.setTimestamp(5, Timestamp.from(Instant.now()));
+            resultCode = pstmt.executeUpdate();
+            System.out.println("Query Successful");
+        } catch (SQLException e) {
+            System.err.println("Error with creating customer query: " + e.getMessage());
+        }
+
+        return resultCode;
+
+
+
+
+    };
+
+
+
     // LOANS
 
     public static ResultSet getLoansFromCustomer(int customerID) throws SQLException{
@@ -133,6 +193,21 @@ public class DatabaseQuery{
         }
         return rs;
     }
+
+//    public static boolean getAccountHasPendingLoan(int accountID) throws SQLException{
+//        ResultSet rs = null;
+//        String sql = "SELECT * FROM loan WHERE customerID = ? and loanStatus = 1";
+//        try {
+//            PreparedStatement pstmt = conn.prepareStatement(sql);
+//            rs = pstmt.executeQuery();
+//            System.out.println("Query Successful");
+//        } catch (SQLException e) {
+//            System.err.println("Error with Get Loans From Customer Query: " + e.getMessage());
+//            System.err.println(e.getErrorCode());
+//        }
+//        return rs.next();
+//    }
+
 
     // BRANCH
 
