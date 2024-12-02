@@ -1,4 +1,3 @@
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Date;
@@ -431,9 +430,9 @@ public class DatabaseQuery{
 
     // All Accounts with Fraudulent Activity
 
-    public static ResultSet getFraudulentAccounts() throws SQLException {
+    public static ResultSet getFraudulentCustomer() throws SQLException {
         ResultSet rs = null;
-        String sql = "select loan.customerID from customer join loan on customer.customerID = loan.customerID join transaction on senderNum where loanStatus = 0 and amount > 50000";
+        String sql = "select customer.* from customer join loan on customer.customerID = loan.customerID join transaction on senderNum where loanStatus = 0 and amount > 50000";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
