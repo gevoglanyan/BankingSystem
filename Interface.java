@@ -1,24 +1,18 @@
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-@SuppressWarnings("unused")
 public class Interface extends JFrame {
 
     private JTabbedPane tabbedPane;
     private JTextArea resultArea;
 
     public Interface() {
-        setTitle("Banking System Database");
-        setSize(700, 500);
+        setTitle("Banking System");
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -30,274 +24,200 @@ public class Interface extends JFrame {
 
         tabbedPane = new JTabbedPane();
 
-        initCustomerPanel();
-        initAccountPanel();
-        initTransactionPanel();
-        initLoanPanel();
-        initBranchPanel();
+        addAccountManagementTab();
+        addTransactionManagementTab();
+        addLoanManagementTab();
+        addEmployeeManagementTab();
 
-        resultArea = new JTextArea();
+        resultArea = new JTextArea(5, 20);
         resultArea.setEditable(false);
         resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scrollPane = new JScrollPane(resultArea);
-        scrollPane.setPreferredSize(new Dimension(700, 150));
 
-        setLayout(new BorderLayout(5, 5));
+        setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
         add(scrollPane, BorderLayout.SOUTH);
     }
 
     private JPanel createGridBagPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        return panel;
+        return new JPanel(new GridBagLayout());
     }
 
-    private JButton createSmallButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.PLAIN, 11));
-        btn.setMargin(new Insets(2, 5, 2, 5));
-        return btn;
+    private JButton createButton(String text) {
+        return new JButton(text);
     }
 
     private JTextField createTextField() {
-        JTextField field = new JTextField(15);
-        field.setFont(new Font("Arial", Font.PLAIN, 11));
-        return field;
+        return new JTextField(15);
     }
 
-    private void initCustomerPanel() {
-        JPanel customerPanel = createGridBagPanel();
+    private void addAccountManagementTab() {
+        JPanel panel = createGridBagPanel();
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Create Account
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        customerPanel.add(new JLabel("Email:"), gbc);
-        
-        gbc.gridx = 1;
-        JTextField emailField = createTextField();
-        customerPanel.add(emailField, gbc);
-
-        gbc.gridx = 2;
-        JButton getByEmailBtn = createSmallButton("Get Customer");
-        getByEmailBtn.addActionListener(e -> {
-            try {
-                ResultSet rs = DatabaseQuery.getCustomerByEmail(emailField.getText());
-                displayResultSet(rs);
-            } catch (SQLException ex) {
-                displayError("Error retrieving customer", ex);
-            }
-        });
-        customerPanel.add(getByEmailBtn, gbc);
-
-        String[] labels = {"First Name:", "Last Name:", "Address:", "Phone:", "Email:"};
-        JTextField[] fields = new JTextField[labels.length];
-
-        for (int i = 0; i < labels.length; i++) {
-            gbc.gridx = 0;
-            gbc.gridy = i + 1;
-            customerPanel.add(new JLabel(labels[i]), gbc);
-
-            gbc.gridx = 1;
-            fields[i] = createTextField();
-            customerPanel.add(fields[i], gbc);
-        }
-
-        gbc.gridx = 2;
-        gbc.gridy = labels.length + 1;
-        JButton createCustomerBtn = createSmallButton("Create Customer");
-        createCustomerBtn.addActionListener(e -> {
-            try {
-                int result = DatabaseQuery.createCustomerQuery(
-                    fields[0].getText(), 
-                    fields[1].getText(), 
-                    fields[2].getText(), 
-                    fields[4].getText(), 
-                    fields[3].getText()
-                );
-                if (result > 0) {
-                    resultArea.setText("Customer created successfully!");
-                } else {
-                    resultArea.setText("Failed to create customer.");
-                }
-            } catch (SQLException ex) {
-                displayError("Error creating customer", ex);
-            }
-        });
-        customerPanel.add(createCustomerBtn, gbc);
-
-        tabbedPane.addTab("Customers", customerPanel);
-    }
-
-    private void initAccountPanel() {
-        JPanel accountPanel = createGridBagPanel();
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        accountPanel.add(new JLabel("Customer ID:"), gbc);
-        
+        panel.add(new JLabel("Customer ID for Account Creation:"), gbc);
         gbc.gridx = 1;
         JTextField customerIDField = createTextField();
-        accountPanel.add(customerIDField, gbc);
-
+        panel.add(customerIDField, gbc);
         gbc.gridx = 2;
-        JButton getAccountBtn = createSmallButton("Get Account");
-        getAccountBtn.addActionListener(e -> {
+        JButton createAccountBtn = createButton("Create Account");
+        createAccountBtn.addActionListener(e -> {
             try {
                 int customerID = Integer.parseInt(customerIDField.getText());
-                ResultSet rs = DatabaseQuery.getAccountByCustomerID(customerID);
-                displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
-                displayError("Error retrieving account", ex);
+                int result = DatabaseQuery.createAccount(customerID, "Savings");
+                resultArea.setText(result > 0 ? "Account Created Successfully" : "Failed to Create Account");
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Creating Account", ex);
             }
         });
-        accountPanel.add(getAccountBtn, gbc);
+        panel.add(createAccountBtn, gbc);
+
+        // Close Account
 
         gbc.gridx = 0;
-        gbc.gridy = 1;
-        accountPanel.add(new JLabel("Min Balance:"), gbc);
-        
+        gbc.gridy++;
+        panel.add(new JLabel("Account ID for Closure:"), gbc);
         gbc.gridx = 1;
-        JTextField balanceField = createTextField();
-        accountPanel.add(balanceField, gbc);
-
+        JTextField accountIDField = createTextField();
+        panel.add(accountIDField, gbc);
         gbc.gridx = 2;
-        JButton getByBalanceBtn = createSmallButton("Accounts Above Balance");
-        getByBalanceBtn.addActionListener(e -> {
+        JButton closeAccountBtn = createButton("Close Account");
+        closeAccountBtn.addActionListener(e -> {
             try {
-                int balance = Integer.parseInt(balanceField.getText());
-                ResultSet rs = DatabaseQuery.getAccountByBalance(balance);
-                displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
-                displayError("Error retrieving accounts", ex);
+                int accountID = Integer.parseInt(accountIDField.getText());
+                int result = DatabaseQuery.closeAccount(accountID);
+                resultArea.setText(result > 0 ? "Account Closed Successfully" : "Failed to Close Account");
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Closing Account", ex);
             }
         });
-        accountPanel.add(getByBalanceBtn, gbc);
+        panel.add(closeAccountBtn, gbc);
 
-        tabbedPane.addTab("Accounts", accountPanel);
+        tabbedPane.addTab("Account Management", panel);
     }
 
-    private void initTransactionPanel() {
-        JPanel transactionPanel = createGridBagPanel();
+    private void addTransactionManagementTab() {
+        JPanel panel = createGridBagPanel();
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Transaction
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        transactionPanel.add(new JLabel("Account Number:"), gbc);
-        
+        panel.add(new JLabel("Sender Account ID:"), gbc);
         gbc.gridx = 1;
-        JTextField accountNumField = createTextField();
-        transactionPanel.add(accountNumField, gbc);
-
+        JTextField senderIDField = createTextField();
+        panel.add(senderIDField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new JLabel("Receiver Account ID:"), gbc);
+        gbc.gridx = 1;
+        JTextField receiverIDField = createTextField();
+        panel.add(receiverIDField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new JLabel("Transaction Amount:"), gbc);
+        gbc.gridx = 1;
+        JTextField transactionAmountField = createTextField();
+        panel.add(transactionAmountField, gbc);
         gbc.gridx = 2;
-        JButton getTransactionsBtn = createSmallButton("Get Transactions");
-        getTransactionsBtn.addActionListener(e -> {
+        JButton transactionBtn = createButton("Validate Transaction");
+        transactionBtn.addActionListener(e -> {
             try {
-                int accountNum = Integer.parseInt(accountNumField.getText());
-                ResultSet rs = DatabaseQuery.transactionsRelatedToAccount(accountNum);
-                displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
-                displayError("Error retrieving transactions", ex);
+                int senderID = Integer.parseInt(senderIDField.getText());
+                int receiverID = Integer.parseInt(receiverIDField.getText());
+                int amount = Integer.parseInt(transactionAmountField.getText());
+                int result = DatabaseQuery.createTransaction(senderID, receiverID, amount);
+                resultArea.setText(result > 0 ? "Transaction Successful" : "Transaction Failed");
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Validating Transaction", ex);
             }
         });
-        transactionPanel.add(getTransactionsBtn, gbc);
+        panel.add(transactionBtn, gbc);
 
-        tabbedPane.addTab("Transactions", transactionPanel);
+        tabbedPane.addTab("Transaction Management", panel);
     }
 
-    private void initLoanPanel() {
-        JPanel loanPanel = createGridBagPanel();
+    private void addLoanManagementTab() {
+        JPanel panel = createGridBagPanel();
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Approve Loan
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        loanPanel.add(new JLabel("Customer ID:"), gbc);
-        
+        panel.add(new JLabel("Customer ID for Loan:"), gbc);
         gbc.gridx = 1;
-        JTextField customerIDLoanField = createTextField();
-        loanPanel.add(customerIDLoanField, gbc);
-
+        JTextField loanCustomerIDField = createTextField();
+        panel.add(loanCustomerIDField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new JLabel("Loan Amount:"), gbc);
+        gbc.gridx = 1;
+        JTextField loanAmountField = createTextField();
+        panel.add(loanAmountField, gbc);
         gbc.gridx = 2;
-        JButton getLoansBtn = createSmallButton("Get Loans");
-        getLoansBtn.addActionListener(e -> {
+        JButton approveLoanBtn = createButton("Approve Loan");
+        approveLoanBtn.addActionListener(e -> {
             try {
-                int customerID = Integer.parseInt(customerIDLoanField.getText());
-                ResultSet rs = DatabaseQuery.getLoansFromCustomer(customerID);
-                displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
-                displayError("Error retrieving loans", ex);
+                int customerID = Integer.parseInt(loanCustomerIDField.getText());
+                int loanAmount = Integer.parseInt(loanAmountField.getText());
+                boolean approved = DatabaseQuery.approveLoan(customerID, loanAmount);
+                resultArea.setText(approved ? "Loan Approved" : "Loan Denied");
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Approving Loan", ex);
             }
         });
-        loanPanel.add(getLoansBtn, gbc);
+        panel.add(approveLoanBtn, gbc);
 
-        tabbedPane.addTab("Loans", loanPanel);
+        tabbedPane.addTab("Loan Management", panel);
     }
 
-    private void initBranchPanel() {
-        JPanel branchPanel = createGridBagPanel();
+    private void addEmployeeManagementTab() {
+        JPanel panel = createGridBagPanel();
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Transfer Employee
+        
         gbc.gridx = 0;
         gbc.gridy = 0;
-        branchPanel.add(new JLabel("Branch ID:"), gbc);
-        
+        panel.add(new JLabel("Employee ID:"), gbc);
+        gbc.gridx = 1;
+        JTextField employeeIDField = createTextField();
+        panel.add(employeeIDField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(new JLabel("New Branch ID:"), gbc);
         gbc.gridx = 1;
         JTextField branchIDField = createTextField();
-        branchPanel.add(branchIDField, gbc);
-
+        panel.add(branchIDField, gbc);
         gbc.gridx = 2;
-        JButton getEmployeesBtn = createSmallButton("Get Employees");
-        getEmployeesBtn.addActionListener(e -> {
+        JButton transferEmployeeBtn = createButton("Transfer Employee");
+        transferEmployeeBtn.addActionListener(e -> {
             try {
-                int branchID = Integer.parseInt(branchIDField.getText());
-                ResultSet rs = DatabaseQuery.getEmployeeFromBranch(branchID);
-                displayResultSet(rs);
-            } catch (NumberFormatException | SQLException ex) {
-                displayError("Error retrieving employees", ex);
+                int employeeID = Integer.parseInt(employeeIDField.getText());
+                int newBranchID = Integer.parseInt(branchIDField.getText());
+                DatabaseQuery.transferEmployee(employeeID, newBranchID);
+                resultArea.setText("Employee Transferred Successfully");
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Transferring Employee", ex);
             }
         });
-        branchPanel.add(getEmployeesBtn, gbc);
+        panel.add(transferEmployeeBtn, gbc);
 
-        tabbedPane.addTab("Branch", branchPanel);
-    }
-
-    private void displayResultSet(ResultSet rs) {
-        try {
-            resultArea.setText("");
-
-            if (rs == null || !rs.isBeforeFirst()) {
-                resultArea.setText("No Results Found.");
-                return;
-            }
-
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            StringBuilder header = new StringBuilder();
-            for (int i = 1; i <= columnCount; i++) {
-                header.append(String.format("%-20s", metaData.getColumnName(i)));
-            }
-            resultArea.append(header.toString() + "\n");
-            resultArea.append("-".repeat(header.length()) + "\n");
-
-            while (rs.next()) {
-                StringBuilder row = new StringBuilder();
-                for (int i = 1; i <= columnCount; i++) {
-                    row.append(String.format("%-20s", rs.getString(i)));
-                }
-                resultArea.append(row.toString() + "\n");
-            }
-        } catch (SQLException e) {
-            displayError("Error displaying results", e);
-        }
+        tabbedPane.addTab("Employee Management", panel);
     }
 
     private void displayError(String message, Exception e) {
@@ -309,10 +229,10 @@ public class Interface extends JFrame {
         SwingUtilities.invokeLater(() -> {
             try {
                 Connection conn = DatabaseConnection.getConnection();
-                
+
                 Interface frame = new Interface();
                 frame.setVisible(true);
-                
+
                 frame.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent e) {
@@ -320,14 +240,14 @@ public class Interface extends JFrame {
                         System.exit(0);
                     }
                 });
-                
+
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, 
-                    "Failed to connect to database:\n" + e.getMessage(), 
-                    "Database Connection Error", 
-                    JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                        "Failed to Connect to Database:\n" + e.getMessage(),
+                        "Database Connection Error",
+                        JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
         });
-    }   
+    }
 }

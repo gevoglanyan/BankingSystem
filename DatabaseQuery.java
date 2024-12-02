@@ -1,10 +1,8 @@
-import javax.xml.transform.Result;
 import java.sql.*;
+import java.time.LocalDate;
+import java.util.Date;
 
 @SuppressWarnings("unused")
-
-// Changed the Name to Match Other Files
-
 public class DatabaseQuery{
 
     private static Connection conn;
@@ -12,9 +10,9 @@ public class DatabaseQuery{
     static {
         try {
             conn = DatabaseConnection.getConnection();
-            System.out.println("Database connection initialized.");
+            System.out.println("Database Connection Initialized.");
         } catch (SQLException e) {
-            System.err.println("Failed to initialize database connection: " + e.getMessage());
+            System.err.println("Failed to Initialize Database Connection: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -23,9 +21,7 @@ public class DatabaseQuery{
         return conn;
     }
 
-    // BUISNESS LOGIC
-
-    // CUSTOMER
+    // Customer
 
     public static ResultSet getCustomerByEmail(String email) throws SQLException {
         ResultSet rs = null;
@@ -36,7 +32,7 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Customer by Email Query: " + e.getMessage());
+            System.err.println("Error With Customer by Email Query: " + e.getMessage());
         }
         return rs;
     }
@@ -50,12 +46,12 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Customer by Address Query: " + e.getMessage());
+            System.err.println("Error With Customer by Address Query: " + e.getMessage());
         }
         return rs;
     }
 
-    // ACCOUNT
+    // Account
 
     public static ResultSet getAccountByCustomerID(int customerID) throws SQLException {
         ResultSet rs = null;
@@ -66,7 +62,7 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Account Query: " + e.getMessage());
+            System.err.println("Error With Account Query: " + e.getMessage());
         }
         return rs;
     }
@@ -80,16 +76,16 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Account Query: " + e.getMessage());
+            System.err.println("Error With Account Query: " + e.getMessage());
         }
         return rs;
     }
 
-    // TRANSACTIONS
+    // Transactions
 
     public static ResultSet transactionsRelatedToAccount(int accountNumber) throws SQLException{
         ResultSet rs = null;
-        String sql = "SELECT * FROM transaction WHERE senderNum = ? or recieverNum = ?";
+        String sql = "SELECT * FROM transaction WHERE senderNum = ? or receiverNum = ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, accountNumber);
@@ -97,7 +93,7 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Transaction Related To Query: " + e.getMessage());
+            System.err.println("Error With Transaction Related To Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
 
         }
@@ -114,13 +110,13 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Transaction Between Dates Query: " + e.getMessage());
+            System.err.println("Error With Transaction Between Dates Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
 
-    // LOANS
+    // Loans
 
     public static ResultSet getLoansFromCustomer(int customerID) throws SQLException{
         ResultSet rs = null;
@@ -131,13 +127,63 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get Loans From Customer Query: " + e.getMessage());
+            System.err.println("Error With Get Loans From Customer Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
 
-    // BRANCH
+    // Loan Approval
+
+    public static boolean approveLoan(int customerID, int loanAmount) throws SQLException {
+        String sqlCheck = "SELECT creditScore, accountHistory FROM customer WHERE customerID = ?";
+        String sqlInsert = "INSERT INTO loan (customerID, amount, status) VALUES (?, ?, 'Approved')";
+        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
+            pstmtCheck.setInt(1, customerID);
+            ResultSet rs = pstmtCheck.executeQuery();
+            if (rs.next()) {
+                int creditScore = rs.getInt("creditScore");
+                int accountHistory = rs.getInt("accountHistory");
+    
+                int creditScoreThreshold = 700; 
+                int accountHistoryThreshold = 2;
+    
+                if (creditScore > creditScoreThreshold && accountHistory > accountHistoryThreshold) {
+                    try (PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
+                        pstmtInsert.setInt(1, customerID);
+                        pstmtInsert.setInt(2, loanAmount);
+                        pstmtInsert.executeUpdate();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    // Loan Payment
+
+    public static void makeLoanPayment(int loanID, int paymentAmount) throws SQLException {
+        String sqlUpdate = "UPDATE loan SET balance = balance - ?, paymentHistory = CONCAT(paymentHistory, ?) WHERE loanID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+            pstmt.setInt(1, paymentAmount);
+            pstmt.setString(2, paymentAmount + " paid on " + LocalDate.now().toString() + "; ");
+            pstmt.setInt(3, loanID);
+            pstmt.executeUpdate();
+        }
+    }
+
+    // Interest Calculation
+
+    public static void calculateInterest(double interestRate) throws SQLException {
+        String sqlUpdate = "UPDATE account SET balance = balance + (balance * ?) WHERE accountType = 'Savings'";
+        try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate)) {
+            pstmtUpdate.setDouble(1, interestRate);
+            pstmtUpdate.executeUpdate();
+        }
+    }
+
+    // Branch
 
     public static ResultSet getEmployeeFromBranch(int branchID) throws SQLException{
         ResultSet rs = null;
@@ -148,11 +194,12 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get Employee With BranchID Query: " + e.getMessage());
+            System.err.println("Error With Get Employee With BranchID Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
+
     public static ResultSet getBranchFromLocation(String location) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM branch WHERE location = ?";
@@ -162,13 +209,24 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get Branch With Location Query: " + e.getMessage());
+            System.err.println("Error With Get Branch With Location Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
 
-    //EMPLOYEE
+    // Branch Transfer
+
+    public static void transferEmployee(int employeeID, int newBranchID) throws SQLException {
+        String sqlUpdate = "UPDATE employee SET branchID = ? WHERE employeeID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+            pstmt.setInt(1, newBranchID);
+            pstmt.setInt(2, employeeID);
+            pstmt.executeUpdate();
+        }
+    }
+
+    //Employee
 
     public static ResultSet getEmployeeFromRole(String role) throws SQLException{
         ResultSet rs = null;
@@ -179,7 +237,7 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get Branch With Location Query: " + e.getMessage());
+            System.err.println("Error With Get Branch With Location Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
@@ -194,13 +252,13 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Employee Hired on Date Query: " + e.getMessage());
+            System.err.println("Error With Employee Hired on Date Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
 
-    // ATM
+    // Atm
 
     public static ResultSet getATMFromBranch(int branchID) throws SQLException{
         ResultSet rs = null;
@@ -211,7 +269,7 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get ATM With BranchID Query: " + e.getMessage());
+            System.err.println("Error With Get ATM With BranchID Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
@@ -225,13 +283,13 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get ATM Query: " + e.getMessage());
+            System.err.println("Error With Get ATM Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
 
-    // CARD
+    // Card
 
     public static ResultSet getCardFromAccountID(int accountID) throws SQLException{
         ResultSet rs = null;
@@ -242,7 +300,7 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get Card With accountID Query: " + e.getMessage());
+            System.err.println("Error With Get Card With accountID Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
@@ -258,30 +316,57 @@ public class DatabaseQuery{
             rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Get Expired Card With accountID & expdate Query: " + e.getMessage());
+            System.err.println("Error With Expired Card With accountID & expdate Query: " + e.getMessage());
             System.err.println(e.getErrorCode());
         }
         return rs;
     }
+
+    // Card Expiry Validation
+
+    public static boolean validateCard(int cardID) throws SQLException {
+        String sql = "SELECT expDate FROM card WHERE cardID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, cardID);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                Date expiry = rs.getDate("expDate");
+                return expiry.after(new Date());
+            }
+            return false;
+        }
+    }
  
-    // UTILITY FUNCTIONS
+    // Utility Functions
 
     public static int createCustomerQuery(String firstName, String lastName, String address, String email, String phoneNumber) throws SQLException {
         int resultCode = -1;
         boolean exists = checkIfEmailExists(email);
         if (exists) {
-            System.err.println("Customer already exists with email: " + email);
+            System.err.println("Customer Already Exists with Email: " + email);
             return -1;
         }
-        String sql = String.format("INSERT INTO customer (firstName, lastName, Address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
+        String sql = String.format("INSERT INTO customer (firstName, lastName, address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             resultCode = pstmt.executeUpdate();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with creating customer query: " + e.getMessage());
+            System.err.println("Error With Creating Customer Query: " + e.getMessage());
         }
         return resultCode;
+    }
+
+    private static boolean hasSufficientBalance(int accountID, int amount) throws SQLException {
+        String sql = "SELECT balance FROM account WHERE accountID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, accountID);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("balance") >= amount;
+            }
+            return false;
+        }
     }
 
     public static boolean checkIfEmailExists(String email) throws SQLException {
@@ -297,26 +382,134 @@ public class DatabaseQuery{
             exists = rs.getInt(1) > 0;
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with creating customer query: " + e.getMessage());
+            System.err.println("Error With Creating Customer Query: " + e.getMessage());
         }
         return exists;
     }
 
-    public static int createTransaction(int senderNum, int recieverNum, String transactionDate, int amount, String transactionType) throws SQLException {
-        int rs = -1;
-        String sql = String.format("INSERT INTO transaction (senderNum, recieverNum, transactionDate, amount, transactionType) VALUES (%o, %o, '%s', %o, '%s')", senderNum, recieverNum, transactionDate, amount, transactionType);
+    // Transaction Validation
+
+    public static int createTransaction(int senderNum, int receiverNum, int amount) throws SQLException {
+        String sqlCheck = "SELECT balance FROM account WHERE accountID = ?";
+        String sqlInsert = "INSERT INTO transaction (senderNum, receiverNum, amount) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck);
+             PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
+            pstmtCheck.setInt(1, senderNum);
+            ResultSet rs = pstmtCheck.executeQuery();
+            if (!hasSufficientBalance(senderNum, amount)) {
+                throw new SQLException("Insufficient balance for transaction.");
+            }
+            pstmtInsert.setInt(1, senderNum);
+            pstmtInsert.setInt(2, receiverNum);
+            pstmtInsert.setInt(3, amount);
+            return pstmtInsert.executeUpdate();
+        }
+    }
+
+    // Minimum Balance Check
+
+    public static void applyMinimumBalanceFee(int minimumBalance, int fee) throws SQLException {
+        String sqlUpdate = "UPDATE account SET balance = balance - ? WHERE balance < ? AND accountType = 'Savings'";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+            pstmt.setInt(1, fee);
+            pstmt.setInt(2, minimumBalance);
+            pstmt.executeUpdate();
+        }
+    }
+
+    // Employee Salary Calculation    
+
+    public static void calculateSalaryIncrement(int employeeID, double incrementFactor) throws SQLException {
+        String sqlUpdate = "UPDATE employee SET salary = salary * ? WHERE employeeID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+            pstmt.setDouble(1, incrementFactor);
+            pstmt.setInt(2, employeeID);
+            pstmt.executeUpdate();
+        }
+    }
+
+    // All Accounts with Fraudulent Activity
+
+    public static ResultSet getFraudulentCustomer() throws SQLException {
+        ResultSet rs = null;
+        String sql = "select customer.* from customer join loan on customer.customerID = loan.customerID join transaction on senderNum where loanStatus = 0 and amount > 50000";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.executeUpdate();
-            rs = 1;
+            rs = pstmt.executeQuery();
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with creating transaction query: " + e.getMessage());
+            System.err.println("Error With Expired Card With accountID & expdate Query: " + e.getMessage());
+            System.err.println(e.getErrorCode());
         }
         return rs;
     }
 
-    //UPDATE
+    // ATMs Requiring Maintenance
+
+    public static ResultSet getATMSNeedService(int branchID) throws SQLException {
+        ResultSet rs = null;
+        String sql = "select * from atm where (maintenanceDate < DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) or currentCash < 500) and branchID = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, branchID);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Getting ATMs Needing service" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+        return rs;
+    }
+
+    // ATMs Requiring Maintenance (from any branch)
+
+    public static ResultSet getATMSNeedService() throws SQLException {
+        ResultSet rs = null;
+        String sql = "select * from atm where (maintenanceDate < DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) or currentCash < 500)";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Getting ATMs Needing service" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+        return rs;
+    }
+
+    // Cards Expiring Soon
+
+    public static ResultSet getCardsExpiringSoon(int accountID) throws SQLException {
+        ResultSet rs = null;
+        String SQL = "select * from card inner join BankSystem.account a on card.accountID = a.accountID where expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) and a.accountID = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(SQL);
+            pstmt.setInt(1, accountID);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Expired Cards" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+
+        return rs;
+    }
+
+    // Cards Expiring Soon (from any account)
+
+    public static ResultSet getCardsExpiringSoon() throws SQLException {
+        ResultSet rs = null;
+        String SQL = "select * from card inner join BankSystem.account a on card.accountID = a.accountID where expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(SQL);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Expired Cards (from any account)" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+
+        return rs;
+    }
+
+
+    // Update
 
     public static int updateCustomer(String firstName, String lastName, String address, String email, String phoneNumber, int customerID) throws SQLException {
         int rs = -1;
@@ -327,7 +520,7 @@ public class DatabaseQuery{
             rs = 1;
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Updating customer query: " + e.getMessage());
+            System.err.println("Error With Updating Customer Query: " + e.getMessage());
             return -1;
         }
         return rs;
@@ -342,7 +535,7 @@ public class DatabaseQuery{
             rs = 1;
             System.out.println("Query Successful");
         } catch (SQLException e) {
-            System.err.println("Error with Updating Loan query: " + e.getMessage());
+            System.err.println("Error with Updating Loan Query: " + e.getMessage());
             return -1;
         }
         return rs;
@@ -363,6 +556,48 @@ public class DatabaseQuery{
     }
     */
 
+    // Account Creation
+
+    public static int createAccount(int customerID, String accountType) throws SQLException {
+        String sqlCheck = "SELECT COUNT(*) FROM account WHERE customerID = ?";
+        String sqlInsert = "INSERT INTO account (customerID, balance, accountType) VALUES (?, 0, ?)";
+        
+        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck);
+             PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
+            pstmtCheck.setInt(1, customerID);
+            ResultSet rs = pstmtCheck.executeQuery();
+            rs.next();
+            if (rs.getInt(1) > 0) {
+                throw new SQLException("Account Already Exists for Customer.");
+            }
+            pstmtInsert.setInt(1, customerID);
+            pstmtInsert.setString(2, accountType);
+            return pstmtInsert.executeUpdate();
+        }
+    }
+
+    // Close Account
+
+    public static int closeAccount(int accountID) throws SQLException {
+        String sqlCheck = "SELECT balance, (SELECT COUNT(*) FROM loan WHERE accountID = ? AND status = 'Pending') AS loans FROM account WHERE accountID = ?";
+        String sqlDelete = "DELETE FROM account WHERE accountID = ?";
+        
+        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck);
+             PreparedStatement pstmtDelete = conn.prepareStatement(sqlDelete)) {
+            pstmtCheck.setInt(1, accountID);
+            pstmtCheck.setInt(2, accountID);
+            ResultSet rs = pstmtCheck.executeQuery();
+            
+            if (rs.next()) {
+                if (rs.getInt("balance") < 0 || rs.getInt("loans") > 0) {
+                    throw new SQLException("Cannot Close Account with Negative Balance or Pending Loans.");
+                }
+            }
+            pstmtDelete.setInt(1, accountID);
+            return pstmtDelete.executeUpdate();
+        }
+    }
+
     public static void printRs(ResultSet rs) throws SQLException {
         if (rs != null) {
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -376,18 +611,35 @@ public class DatabaseQuery{
                 System.out.println();
             }
         } else {
-            System.out.println("No results to display.");
+            System.out.println("No Results to Display.");
         }
+    }
+
+    public static ResultSet executeCustomQuery(String query) throws SQLException {
+        Statement stmt = null;
+        ResultSet rs = null;
+    
+        try {
+            stmt = conn.createStatement();
+    
+            rs = stmt.executeQuery(query);
+            System.out.println("Custom Query Executed Successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error Executing Custom Query: " + e.getMessage());
+            throw e;
+        }
+    
+        return rs;
     }
 
     public static void closeConnection() {
         try {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
-                System.out.println("Database connection closed.");
+                System.out.println("Database Connection Closed.");
             }
         } catch (SQLException e) {
-            System.err.println("Error closing database connection: " + e.getMessage());
+            System.err.println("Error Closing Database Connection: " + e.getMessage());
         }
     }
 }
