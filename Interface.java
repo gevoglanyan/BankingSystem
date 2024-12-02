@@ -29,12 +29,14 @@ public class Interface extends JFrame {
         // Different Panels 
 
         initCreateCustomerPanel();
+        initSendMoneyPanel();
         initCustomerPanel();
         initAccountPanel();
         initTransactionPanel();
         initLoanPanel();
         initBranchPanel();
         initATMPanel();
+        initEmployeePanel();
         initCardPanel();
         initAdminPanel();
 
@@ -178,7 +180,6 @@ public class Interface extends JFrame {
             }
         });
         createCustomerPanel.add(submitButton, gbc);
-    
         tabbedPane.addTab("Create Customer", createCustomerPanel);
     }
     
@@ -237,8 +238,69 @@ public class Interface extends JFrame {
         });
         transactionPanel.add(getTransactionsBtn, gbc);
 
+
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        transactionPanel.add(new JLabel("Send money:"), gbc);
+
+
         tabbedPane.addTab("Transactions", transactionPanel);
     }
+
+    private void initSendMoneyPanel() {
+        JPanel sendMoneyPanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+
+        gbc.gridy = 0;
+
+        gbc.gridx = 0;
+        sendMoneyPanel.add(new JLabel("Sending account number:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField senderAccountNum = createTextField();
+        sendMoneyPanel.add(senderAccountNum, gbc);
+
+        gbc.gridy = 1;
+
+        gbc.gridx = 0;
+        sendMoneyPanel.add(new JLabel("Receiving account number:"), gbc);
+        gbc.gridx = 1;
+        JTextField receiverAccountNum = createTextField();
+        sendMoneyPanel.add(receiverAccountNum, gbc);
+
+        gbc.gridy = 2;
+        gbc.gridx = 0;
+        sendMoneyPanel.add(new JLabel("Money amount:"), gbc);
+        gbc.gridx = 1;
+        JTextField moneyAmount = createTextField();
+        sendMoneyPanel.add(moneyAmount, gbc);
+
+        gbc.gridy = 4;
+        JButton getTransactionsBtn = createSmallButton("Send Money");
+        getTransactionsBtn.addActionListener(e -> {
+            try {
+                int senderAccountNumVal = Integer.parseInt(senderAccountNum.getText());
+                int receiverAccountNumVal = Integer.parseInt(receiverAccountNum.getText());
+                int moneyAmountVal = Integer.parseInt(moneyAmount.getText());
+                int result = DatabaseQuery.createTransactionWithCheck(senderAccountNumVal,receiverAccountNumVal,moneyAmountVal,"wire");
+//                displayResultSet(rs);
+                if(result == -2) {
+                    resultArea.append("Transaction Failed!\nThe sending account does not have enough money!");
+                } else if (result == -1) {
+                    resultArea.append("Transaction Failed!\nA backend error has occured");
+                } else {
+                    resultArea.append("Transaction created successfully!");
+                }
+
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Retrieving Transactions", ex);
+            }
+        });
+        sendMoneyPanel.add(getTransactionsBtn, gbc);
+        tabbedPane.addTab("Send Money", sendMoneyPanel);
+    }
+
 
     private void initLoanPanel() {
         JPanel loanPanel = createGridBagPanel();
@@ -296,6 +358,35 @@ public class Interface extends JFrame {
         branchPanel.add(getEmployeesBtn, gbc);
 
         tabbedPane.addTab("Branches", branchPanel);
+    }
+
+    private void initEmployeePanel(){
+        JPanel employeePanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        employeePanel.add(new JLabel("Branch ID:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField branchIDField = createTextField();
+        employeePanel.add(branchIDField, gbc);
+
+        gbc.gridx = 2;
+        JButton getATMsBtn = createSmallButton("Get Employees");
+        getATMsBtn.addActionListener(e -> {
+            try {
+                int branchID = Integer.parseInt(branchIDField.getText());
+                ResultSet rs = DatabaseQuery.getEmployeeFromBranch(branchID);
+                displayResultSet(rs);
+            } catch (SQLException | NumberFormatException ex) {
+                displayError("Error Retrieving Employees", ex);
+            }
+        });
+        employeePanel.add(getATMsBtn, gbc);
+
+        tabbedPane.addTab("Employees", employeePanel);
     }
 
     private void initATMPanel() {
@@ -380,6 +471,8 @@ public class Interface extends JFrame {
                 displayError("Error Executing Query", ex);
             }
         });
+
+
         adminPanel.add(executeQueryBtn, gbc);
 
         tabbedPane.addTab("Admin", adminPanel);

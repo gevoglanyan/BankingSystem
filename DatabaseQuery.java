@@ -149,11 +149,12 @@ public class DatabaseQuery{
         return rs;
     }
 
-    public static int createTransaction(int senderNum, int receiverNum, int amount, String transactionType) throws SQLException{
+
+    public static int createTransactionWithCheck(int senderNum, int receiverNum, int amount, String transactionType) throws SQLException{
         int resultCode = 0;
         String sql = "INSERT INTO transaction (senderNum, receiverNum, amount, transactionType, transactionDate) VALUES (?, ?, ?, ?, ?)";
         if(!getAccountHasBalance(senderNum, amount)) {
-            return -1;
+            return -2;
         }
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -225,6 +226,7 @@ public class DatabaseQuery{
         }
         return rs;
     }
+
     public static ResultSet getBranchFromLocation(String location) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM branch WHERE location = ?";
@@ -239,6 +241,8 @@ public class DatabaseQuery{
         }
         return rs;
     }
+
+
 
     //EMPLOYEE
 
@@ -272,6 +276,40 @@ public class DatabaseQuery{
         return rs;
     }
 
+    public static int moveEmployeeToBranch(int branchID, int employeeID) throws SQLException{
+        int resultCode = -1;
+        if(!branchExists(branchID)) {
+            return -2;
+        }
+        String sql = "UPDATE employee SET branchID = ? WHERE employeeID = ? ";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, branchID);
+            pstmt.setInt(2, employeeID);
+            resultCode = pstmt.executeUpdate();
+            System.out.println("Query Successful");
+        } catch (SQLException e) {
+            System.err.println("Error with Employee Hired on Date Query: " + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+        return resultCode;
+    }
+    public static boolean branchExists(int branchID) throws SQLException{
+        ResultSet rs;
+        boolean exists = false;
+        String sql = "SELECT count(*) FROM branch WHERE branchID = ?";
+        try{
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, branchID);
+            rs = pstmt.executeQuery();
+            rs.next();
+            exists = rs.getInt(1) > 0;
+            System.out.println("Query Successful");
+        } catch (SQLException e) {
+            System.err.println("Error with checking if branch exists: " + e.getMessage());
+        }
+        return exists;
+    }
     // ATM
 
     public static ResultSet getATMFromBranch(int branchID) throws SQLException{

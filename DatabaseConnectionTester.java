@@ -51,8 +51,10 @@ public class DatabaseConnectionTester {
 //            Transaction transaction = new Transaction(DatabaseQuery.transactionsRelatedToAccount(1));
 //            System.out.println(transaction);
 
-            int result = DatabaseQuery.createTransaction(1,2,1000000,"wire");
-            System.out.println(result);
+//            int result = DatabaseQuery.createTransactionWithCheck(1,2,1000000,"wire");
+            int rs = DatabaseQuery.moveEmployeeToBranch(2,1);
+            System.out.println(rs);
+//            DatabaseQuery.printRs(rs);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error Connecting to Database: " + e.getMessage());
