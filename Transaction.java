@@ -7,6 +7,7 @@ enum TransactionType {
     Wire,
     Invalid
 }
+
 public class Transaction {
 
     int senderNum;

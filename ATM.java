@@ -10,8 +10,6 @@ public class ATM {
     String location;
     Timestamp maintenanceDate;
 
-
-
     public ATM(ResultSet rs) throws SQLException {
         if (rs.next()) {
             branchID = rs.getInt("branchID");

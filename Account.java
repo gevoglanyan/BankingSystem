@@ -9,7 +9,6 @@ enum AccountType {
     Invalid
 }
 
-
 public class Account {
     int accountID;
     int accountNum;
@@ -48,6 +47,3 @@ public class Account {
                 '}';
     }
 }
-
-
-
