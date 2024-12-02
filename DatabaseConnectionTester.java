@@ -1,9 +1,6 @@
-import javax.xml.transform.Result;
+
 import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,7 +11,9 @@ public class DatabaseConnectionTester {
         try {
             Connection conn = DatabaseConnection.getConnection();
             System.out.println("Connected to Database");
-
+            testATMsNeedService();
+            testFraudulentAccounts();
+            testExpiringCards();
             testAccountCreation();
             testAccountClosure();
             testTransactionValidation();
@@ -25,41 +24,6 @@ public class DatabaseConnectionTester {
             testBranchTransfer();
             testMinimumBalanceCheck();
             testSalaryCalculation();
-
-            /* 
-
-            ResultSet rs = DatabaseQuery.customerQuery1("professor1@gmail.com")
-            DatabaseQuery.printRs(rs);
-
-            ResultSet rs2 = DatabaseQuery.getCustomerByAddress("hogwarts");
-            DatabaseQuery.printRs(rs2);
-
-            int rs3 = DatabaseQuery.createCustomerQuery("Maxwell","Kozlov","CSUN","maxwell.kozlov.595@my.csun.edu","818-523-6396");
-            Boolean status = DatabaseQuery.checkIfEmailExists("maxwell.kozlov.55@my.csun.edu");ed
-            System.out.println(status);
-
-            ResultSet rs4 = DatabaseQuery.transactionsRelatedToAccount(1);
-            DatabaseQuery.printRs(rs4);
-
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date fromDate = formatter.parse("2024-11-12 00:00:00");
-            Date toDate = formatter.parse("2024-11-30 23:59:59");
-            ResultSet rs5 = DatabaseQuery.transactionsBetweenDates(Timestamp.from(fromDate.toInstant()), Timestamp.from(toDate.toInstant()));
-            DatabaseQuery.printRs(rs5);
-
-            ResultSet rs6 = DatabaseQuery.getLoansFromCustomer(1);
-            DatabaseQuery.printRs(rs6);
-
-            Customer customer = new Customer(DatabaseQuery.getCustomerByEmail("professor1@gmail.com"));
-            System.out.println(customer);
-
-            Employee employee = new Employee(DatabaseQuery.getEmployeeFromBranch(1));
-            System.out.println(employee);
-
-            Loan loan = new Loan(DatabaseQuery.getLoansFromCustomer(1));
-            System.out.println(loan);
-
-            */
 
             System.out.println("All Tests Completed Successfully");
 
@@ -142,5 +106,26 @@ public class DatabaseConnectionTester {
         System.out.println("Testing Employee Salary Calculation...");
         DatabaseQuery.calculateSalaryIncrement(1, 1.1); 
         System.out.println("Salary Updated Successfully");
+    }
+
+    public static void testFraudulentAccounts() throws SQLException {
+        System.out.println("Testing Fraudulent Accounts...");
+        ResultSet rs = DatabaseQuery.getFraudulentAccounts();
+        assert rs.next() == true;
+        System.out.println("Account Updated Successfully");
+    }
+
+    public static void testATMsNeedService() throws SQLException {
+        System.out.println("Testing ATMs NeedService...");
+        ResultSet rs = DatabaseQuery.getATMSNeedService();
+        assert rs.next() == true;
+        System.out.println("ATM Updated Successfully");
+    }
+
+    public static void testExpiringCards() throws SQLException {
+        System.out.println("Testing Expiring Cards...");
+        ResultSet rs = DatabaseQuery.getCardsExpiringSoon(12);
+        assert rs.next() == true;
+        System.out.println("Card Expiring Soon Queried Successfully");
     }
 }

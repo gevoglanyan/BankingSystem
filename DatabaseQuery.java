@@ -165,14 +165,14 @@ public class DatabaseQuery{
     // Loan Payment
 
     public static void makeLoanPayment(int loanID, int paymentAmount) throws SQLException {
-    String sqlUpdate = "UPDATE loan SET balance = balance - ?, paymentHistory = CONCAT(paymentHistory, ?) WHERE loanID = ?";
-    try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
-        pstmt.setInt(1, paymentAmount);
-        pstmt.setString(2, paymentAmount + " paid on " + LocalDate.now().toString() + "; ");
-        pstmt.setInt(3, loanID);
-        pstmt.executeUpdate();
+        String sqlUpdate = "UPDATE loan SET balance = balance - ?, paymentHistory = CONCAT(paymentHistory, ?) WHERE loanID = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+            pstmt.setInt(1, paymentAmount);
+            pstmt.setString(2, paymentAmount + " paid on " + LocalDate.now().toString() + "; ");
+            pstmt.setInt(3, loanID);
+            pstmt.executeUpdate();
+        }
     }
-}
 
     // Interest Calculation
 
@@ -428,6 +428,87 @@ public class DatabaseQuery{
             pstmt.executeUpdate();
         }
     }
+
+    // All Accounts with Fraudulent Activity
+
+    public static ResultSet getFraudulentAccounts() throws SQLException {
+        ResultSet rs = null;
+        String sql = "select loan.customerID from customer join loan on customer.customerID = loan.customerID join transaction on senderNum where loanStatus = 0 and amount > 50000";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            System.out.println("Query Successful");
+        } catch (SQLException e) {
+            System.err.println("Error With Expired Card With accountID & expdate Query: " + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+        return rs;
+    }
+
+    // ATMs Requiring Maintenance
+
+    public static ResultSet getATMSNeedService(int branchID) throws SQLException {
+        ResultSet rs = null;
+        String sql = "select * from atm where (maintenanceDate < DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) or currentCash < 500) and branchID = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, branchID);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Getting ATMs Needing service" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+        return rs;
+    }
+
+    // ATMs Requiring Maintenance (from any branch)
+
+    public static ResultSet getATMSNeedService() throws SQLException {
+        ResultSet rs = null;
+        String sql = "select * from atm where (maintenanceDate < DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) or currentCash < 500)";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Getting ATMs Needing service" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+        return rs;
+    }
+
+    // Cards Expiring Soon
+
+    public static ResultSet getCardsExpiringSoon(int accountID) throws SQLException {
+        ResultSet rs = null;
+        String SQL = "select * from card inner join BankSystem.account a on card.accountID = a.accountID where expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) and a.accountID = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(SQL);
+            pstmt.setInt(1, accountID);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Expired Cards" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+
+        return rs;
+    }
+
+    // Cards Expiring Soon (from any account)
+
+    public static ResultSet getCardsExpiringSoon() throws SQLException {
+        ResultSet rs = null;
+        String SQL = "select * from card inner join BankSystem.account a on card.accountID = a.accountID where expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(SQL);
+            rs = pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error With Expired Cards (from any account)" + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+
+        return rs;
+    }
+
 
     // Update
 
