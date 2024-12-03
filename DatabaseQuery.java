@@ -39,6 +39,39 @@ public class DatabaseQuery{
         return rs;
     }
 
+    public static DefaultTableModel getCustomerDetails(String email) throws SQLException {
+        String sql = "SELECT c.customerID, c.firstName, c.lastName, c.address, c.email, c.phoneNumber, " +
+                     "a.accountID " +
+                     "FROM customer c " +
+                     "LEFT JOIN account a ON c.customerID = a.customerID " +
+                     "WHERE c.email = ?";
+        DefaultTableModel tableModel = new DefaultTableModel();
+    
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+    
+                for (int i = 1; i <= columnCount; i++) {
+                    tableModel.addColumn(metaData.getColumnName(i));
+                }
+    
+                while (rs.next()) {
+                    Object[] row = new Object[columnCount];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getObject(i);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error Fetching Customer Details: " + e.getMessage());
+            throw e;
+        }
+        return tableModel;
+    }
+    
     public static ResultSet getCustomerByAddress(String address) throws SQLException {
         ResultSet rs = null;
         String sql = "SELECT * FROM customer WHERE address LIKE ?";

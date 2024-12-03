@@ -31,6 +31,7 @@ public class Interface extends JFrame {
         resultArea = new JTextArea(10, 50);
         resultArea.setEditable(false);
 
+        initCreateCustomerPanel();
         addATMMaintenanceTab();
         addCardManagementTab();
         addSalaryCalculationTab();
@@ -44,6 +45,111 @@ public class Interface extends JFrame {
         add(tabbedPane, BorderLayout.CENTER);
     }
 
+    private void initCreateCustomerPanel() {
+        JPanel createCustomerPanel = createGridBagPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        Dimension textFieldSize = new Dimension(300, 25);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        createCustomerPanel.add(new JLabel("First Name:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField firstNameField = new JTextField();
+        firstNameField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(firstNameField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        createCustomerPanel.add(new JLabel("Last Name:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField lastNameField = new JTextField();
+        lastNameField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(lastNameField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        createCustomerPanel.add(new JLabel("Address:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField addressField = new JTextField();
+        addressField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(addressField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        createCustomerPanel.add(new JLabel("Email:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField emailField = new JTextField();
+        emailField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(emailField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        createCustomerPanel.add(new JLabel("Phone Number:"), gbc);
+    
+        gbc.gridx = 1;
+        JTextField phoneNumberField = new JTextField();
+        phoneNumberField.setPreferredSize(textFieldSize);
+        createCustomerPanel.add(phoneNumberField, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        JButton submitButton = new JButton("Create Customer");
+    
+        JTable resultTable = new JTable(); 
+        JScrollPane resultScrollPane = new JScrollPane(resultTable);
+        resultScrollPane.setPreferredSize(new Dimension(800, 300)); 
+        resultScrollPane.setBorder(BorderFactory.createEmptyBorder());
+    
+        submitButton.addActionListener(e -> {
+            String firstName = firstNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
+            String address = addressField.getText().trim();
+            String email = emailField.getText().trim();
+            String phoneNumber = phoneNumberField.getText().trim();
+    
+            if (firstName.isEmpty() || lastName.isEmpty() || address.isEmpty() || email.isEmpty() || phoneNumber.isEmpty()) {
+                JOptionPane.showMessageDialog(createCustomerPanel, "All fields must be filled.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+    
+            try {
+                int result = DatabaseQuery.createCustomerQuery(firstName, lastName, address, email, phoneNumber);
+                if (result > 0) {
+                    JOptionPane.showMessageDialog(createCustomerPanel, "Customer Created Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+    
+                    DefaultTableModel tableModel = DatabaseQuery.getCustomerDetails(email);
+                    resultTable.setModel(tableModel);
+    
+                    firstNameField.setText("");
+                    lastNameField.setText("");
+                    addressField.setText("");
+                    emailField.setText("");
+                    phoneNumberField.setText("");
+                } else {
+                    JOptionPane.showMessageDialog(createCustomerPanel, "Failed to Create Customer. Email might already exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (SQLException ex) {
+                showError("Error Creating Customer", ex);
+            }
+        });
+    
+        createCustomerPanel.add(submitButton, gbc);
+    
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        createCustomerPanel.add(resultScrollPane, gbc);
+    
+        tabbedPane.addTab("Create Customer", createCustomerPanel);
+    }
+    
     private void addATMMaintenanceTab() {
         JPanel panel = createGridBagPanel();
     
