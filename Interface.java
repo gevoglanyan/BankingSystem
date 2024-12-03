@@ -98,6 +98,7 @@ public class Interface extends JFrame {
         JTable resultTable = new JTable();
         JScrollPane resultScrollPane = new JScrollPane(resultTable);
         resultScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        resultScrollPane.setPreferredSize(new Dimension(700, 300)); 
     
         fetchButton.addActionListener(e -> {
             String input = accountIDField.getText();
@@ -136,6 +137,7 @@ public class Interface extends JFrame {
         tabbedPane.addTab("Card Management", panel);
     }
     
+    
     private void addSalaryCalculationTab() {
         JPanel panel = createGridBagPanel();
     
@@ -155,6 +157,7 @@ public class Interface extends JFrame {
                 int employeeID = Integer.parseInt(employeeIDField.getText());
                 double incrementFactor = Double.parseDouble(incrementFactorField.getText());
     
+
                 DefaultTableModel tableModel = DatabaseQuery.calculateSalaryIncrement(employeeID, incrementFactor);
     
                 if (tableModel.getRowCount() == 0) {
@@ -172,7 +175,7 @@ public class Interface extends JFrame {
                 incrementFactorField.setText("");
             }
         });
-    
+
         addToGridBag(panel, employeeIDLabel, 0, 0);
         addToGridBag(panel, employeeIDField, 0, 1);
         addToGridBag(panel, incrementFactorLabel, 0, 2);
@@ -183,7 +186,7 @@ public class Interface extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.fill = GridBagConstraints.BOTH; 
         gbc.insets = new Insets(10, 10, 10, 10);
         panel.add(resultScrollPane, gbc);
     
@@ -201,51 +204,29 @@ public class Interface extends JFrame {
         JTextField amountField = new JTextField(15);
         JButton validateButton = new JButton("Validate Transaction");
     
-        JTable transactionDetailsTable = new JTable();
-
-        JScrollPane tableScrollPane = new JScrollPane(transactionDetailsTable);
-        tableScrollPane.setPreferredSize(new Dimension(600, 150));
-        tableScrollPane.setBorder(BorderFactory.createEmptyBorder()); 
+        JTable resultTable = new JTable();
+        JScrollPane resultScrollPane = new JScrollPane(resultTable);
+        resultScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        resultScrollPane.setPreferredSize(new Dimension(600, 200));
     
         validateButton.addActionListener(e -> {
-            String senderText = senderIDField.getText();
-            String receiverText = receiverIDField.getText();
-            String amountText = amountField.getText();
-    
-            if (senderText.isEmpty() || receiverText.isEmpty() || amountText.isEmpty()) {
-                JOptionPane.showMessageDialog(panel, "All fields are required.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-    
             try {
-                int senderID = Integer.parseInt(senderText);
-                int receiverID = Integer.parseInt(receiverText);
+                int senderID = Integer.parseInt(senderIDField.getText());
+                int receiverID = Integer.parseInt(receiverIDField.getText());
+                int amount = Integer.parseInt(amountField.getText());
     
-                ResultSet senderResult = DatabaseQuery.getAccountByCustomerID(senderID);
-                ResultSet receiverResult = DatabaseQuery.getAccountByCustomerID(receiverID);
+                DefaultTableModel tableModel = DatabaseQuery.createTransactionAndGetDetails(senderID, receiverID, amount);
     
-                DefaultTableModel tableModel = new DefaultTableModel();
-                tableModel.addColumn("Account");
-                tableModel.addColumn("ID");
-                tableModel.addColumn("Balance");
-    
-                if (senderResult.next()) {
-                    tableModel.addRow(new Object[]{"Sender", senderResult.getInt("accountID"), senderResult.getInt("balance")});
-                }
-                if (receiverResult.next()) {
-                    tableModel.addRow(new Object[]{"Receiver", receiverResult.getInt("accountID"), receiverResult.getInt("balance")});
-                }
-    
-                transactionDetailsTable.setModel(tableModel);
-    
-            } catch (SQLException ex) {
-                if (ex.getMessage().contains("Insufficient Balance")) {
-                    JOptionPane.showMessageDialog(panel, "Transaction Failed: Insufficient Balance.", "Transaction Error", JOptionPane.ERROR_MESSAGE);
+                if (tableModel.getRowCount() == 0) {
+                    JOptionPane.showMessageDialog(panel, "Transaction Failed.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    showError("Error Validating Transaction", ex);
+                    resultTable.setModel(tableModel); 
+                    JOptionPane.showMessageDialog(panel, "Transaction Successful.");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(panel, "Invalid Input. Please Enter Valid Numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException ex) {
+                showError("Error Validating Transaction", ex);
             } finally {
                 senderIDField.setText("");
                 receiverIDField.setText("");
@@ -261,14 +242,13 @@ public class Interface extends JFrame {
         addToGridBag(panel, amountField, 0, 5);
         addToGridBag(panel, validateButton, 0, 6);
     
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 7;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(10, 10, 10, 10);
-        panel.add(tableScrollPane, gbc);
+        panel.add(resultScrollPane, gbc);
     
         tabbedPane.addTab("Transaction Validation", panel);
     }
@@ -297,6 +277,7 @@ public class Interface extends JFrame {
 
         JTable resultTable = new JTable();
         JScrollPane resultScrollPane = new JScrollPane(resultTable);
+        resultScrollPane.setBorder(BorderFactory.createEmptyBorder());
         resultScrollPane.setPreferredSize(new Dimension(600, 200));
 
         queryButton.addActionListener(e -> {

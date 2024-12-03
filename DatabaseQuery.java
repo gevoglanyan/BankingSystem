@@ -443,33 +443,66 @@ public class DatabaseQuery{
 
     // Transaction Validation
 
-    public static String createTransactionAndGetDetails(int senderNum, int receiverNum, int amount) throws SQLException {
-        String senderQuery = "SELECT * FROM account WHERE accountID = ?";
-        String receiverQuery = "SELECT * FROM account WHERE accountID = ?";
-        StringBuilder transactionDetails = new StringBuilder();
+    public static DefaultTableModel createTransactionAndGetDetails(int senderNum, int receiverNum, int amount) throws SQLException {
+        String deductBalanceQuery = "UPDATE account SET balance = balance - ? WHERE accountID = ?";
+        String addBalanceQuery = "UPDATE account SET balance = balance + ? WHERE accountID = ?";
+        String fetchAccountQuery = "SELECT accountID, balance FROM account WHERE accountID = ?";
+        DefaultTableModel tableModel = new DefaultTableModel();
     
-        try (PreparedStatement pstmtSender = conn.prepareStatement(senderQuery);
-             PreparedStatement pstmtReceiver = conn.prepareStatement(receiverQuery)) {
-            
-            pstmtSender.setInt(1, senderNum);
-            ResultSet senderResult = pstmtSender.executeQuery();
-            if (senderResult.next()) {
-                transactionDetails.append("Sender:\n");
-                transactionDetails.append("ID: ").append(senderResult.getInt("accountID"))
-                                  .append(", Balance: ").append(senderResult.getInt("balance"))
-                                  .append("\n");
+        try (PreparedStatement deductBalanceStmt = conn.prepareStatement(deductBalanceQuery);
+             PreparedStatement addBalanceStmt = conn.prepareStatement(addBalanceQuery);
+             PreparedStatement fetchAccountStmt = conn.prepareStatement(fetchAccountQuery)) {
+
+            deductBalanceStmt.setInt(1, amount);
+            deductBalanceStmt.setInt(2, senderNum);
+            int senderUpdated = deductBalanceStmt.executeUpdate();
+    
+            if (senderUpdated == 0) {
+                throw new SQLException("Failed to update sender's balance. Sender account may not exist.");
             }
     
-            pstmtReceiver.setInt(1, receiverNum);
-            ResultSet receiverResult = pstmtReceiver.executeQuery();
-            if (receiverResult.next()) {
-                transactionDetails.append("Receiver:\n");
-                transactionDetails.append("ID: ").append(receiverResult.getInt("accountID"))
-                                  .append(", Balance: ").append(receiverResult.getInt("balance"))
-                                  .append("\n");
+            addBalanceStmt.setInt(1, amount);
+            addBalanceStmt.setInt(2, receiverNum);
+            int receiverUpdated = addBalanceStmt.executeUpdate();
+    
+            if (receiverUpdated == 0) {
+                throw new SQLException("Failed to update receiver's balance. Receiver account may not exist.");
             }
+    
+            fetchAccountStmt.setInt(1, senderNum);
+            try (ResultSet senderRs = fetchAccountStmt.executeQuery()) {
+                if (tableModel.getColumnCount() == 0) {
+                    ResultSetMetaData metaData = senderRs.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+                    for (int i = 1; i <= columnCount; i++) {
+                        tableModel.addColumn(metaData.getColumnName(i));
+                    }
+                }
+                while (senderRs.next()) {
+                    Object[] row = new Object[tableModel.getColumnCount()];
+                    for (int i = 0; i < tableModel.getColumnCount(); i++) {
+                        row[i] = senderRs.getObject(i + 1);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
+    
+            fetchAccountStmt.setInt(1, receiverNum);
+            try (ResultSet receiverRs = fetchAccountStmt.executeQuery()) {
+                while (receiverRs.next()) {
+                    Object[] row = new Object[tableModel.getColumnCount()];
+                    for (int i = 0; i < tableModel.getColumnCount(); i++) {
+                        row[i] = receiverRs.getObject(i + 1);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error Creating Transaction and Fetching Details: " + e.getMessage());
+            throw e;
         }
-        return transactionDetails.toString();
+    
+        return tableModel;
     }
     
     // Minimum Balance Check
