@@ -2,6 +2,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.Date;
 
+import javax.swing.table.DefaultTableModel;
+
 @SuppressWarnings("unused")
 public class DatabaseQuery{
 
@@ -83,38 +85,75 @@ public class DatabaseQuery{
 
     // Transactions
 
-    public static ResultSet transactionsRelatedToAccount(int accountNumber) throws SQLException{
-        ResultSet rs = null;
-        String sql = "SELECT * FROM transaction WHERE senderNum = ? or receiverNum = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+    public static DefaultTableModel transactionsRelatedToAccount(int accountNumber) throws SQLException {
+        String sql = "SELECT * FROM transaction WHERE senderNum = ? OR receiverNum = ?";
+        DefaultTableModel tableModel = new DefaultTableModel();
+    
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, accountNumber);
             pstmt.setInt(2, accountNumber);
-            rs = pstmt.executeQuery();
-            System.out.println("Query Successful");
+    
+            try (ResultSet rs = pstmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+    
+                // Add column names to the table model
+                for (int i = 1; i <= columnCount; i++) {
+                    tableModel.addColumn(metaData.getColumnName(i));
+                }
+    
+                // Add rows to the table model
+                while (rs.next()) {
+                    Object[] row = new Object[columnCount];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getObject(i);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
         } catch (SQLException e) {
-            System.err.println("Error With Transaction Related To Query: " + e.getMessage());
-            System.err.println(e.getErrorCode());
-
+            System.err.println("Error With Transaction Related To Account Query: " + e.getMessage());
+            throw e;
         }
-        return rs;
+    
+        return tableModel;
     }
+    
 
-    public static ResultSet transactionsBetweenDates(Timestamp from, Timestamp to) throws SQLException{
-        ResultSet rs = null;
-        String sql = "SELECT * FROM transaction WHERE transactionDate >= ? and transactionDate <= ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+    public static DefaultTableModel transactionsBetweenDates(Timestamp from, Timestamp to) throws SQLException {
+        String sql = "SELECT * FROM transaction WHERE transactionDate >= ? AND transactionDate <= ?";
+        DefaultTableModel tableModel = new DefaultTableModel();
+    
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setTimestamp(1, from);
             pstmt.setTimestamp(2, to);
-            rs = pstmt.executeQuery();
-            System.out.println("Query Successful");
+    
+            try (ResultSet rs = pstmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+    
+                // Add column names to the table model
+                for (int i = 1; i <= columnCount; i++) {
+                    tableModel.addColumn(metaData.getColumnName(i));
+                }
+    
+                // Add rows to the table model
+                while (rs.next()) {
+                    Object[] row = new Object[columnCount];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getObject(i);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
         } catch (SQLException e) {
             System.err.println("Error With Transaction Between Dates Query: " + e.getMessage());
-            System.err.println(e.getErrorCode());
+            throw e;
         }
-        return rs;
+    
+        return tableModel;
     }
+    
 
     // Loans
 
@@ -135,31 +174,37 @@ public class DatabaseQuery{
 
     // Loan Approval
 
-//    public static boolean approveLoan(int customerID, int loanAmount) throws SQLException {
-//        String sqlCheck = "SELECT creditScore, accountHistory FROM customer WHERE customerID = ?";
-//        String sqlInsert = "INSERT INTO loan (customerID, amount, status) VALUES (?, ?, 'Approved')";
-//        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
-//            pstmtCheck.setInt(1, customerID);
-//            ResultSet rs = pstmtCheck.executeQuery();
-//            if (rs.next()) {
-//                int creditScore = rs.getInt("creditScore");
-//                int accountHistory = rs.getInt("accountHistory");
-//
-//                int creditScoreThreshold = 700;
-//                int accountHistoryThreshold = 2;
-//
-//                if (creditScore > creditScoreThreshold && accountHistory > accountHistoryThreshold) {
-//                    try (PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
-//                        pstmtInsert.setInt(1, customerID);
-//                        pstmtInsert.setInt(2, loanAmount);
-//                        pstmtInsert.executeUpdate();
-//                        return true;
-//                    }
-//                }
-//            }
-//            return false;
-//        }
-//    }
+    /*
+
+    public static boolean approveLoan(int customerID, int loanAmount) throws SQLException {
+        String sqlCheck = "SELECT creditScore, accountHistory FROM customer WHERE customerID = ?";
+        String sqlInsert = "INSERT INTO loan (customerID, amount, status) VALUES (?, ?, 'Approved')";
+        
+        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
+            pstmtCheck.setInt(1, customerID);
+            ResultSet rs = pstmtCheck.executeQuery();
+            
+            if (rs.next()) {
+                int creditScore = rs.getInt("creditScore");
+                int accountHistory = rs.getInt("accountHistory");
+
+                int creditScoreThreshold = 700;
+                int accountHistoryThreshold = 2;
+
+                if (creditScore > creditScoreThreshold && accountHistory > accountHistoryThreshold) {
+                    try (PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
+                        pstmtInsert.setInt(1, customerID);
+                        pstmtInsert.setInt(2, loanAmount);
+                        pstmtInsert.executeUpdate();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    */
 
     // Loan Payment
 
@@ -404,23 +449,37 @@ public class DatabaseQuery{
 
     // Transaction Validation
 
-    public static int createTransaction(int senderNum, int receiverNum, int amount) throws SQLException {
-        String sqlCheck = "SELECT balance FROM account WHERE accountID = ?";
-        String sqlInsert = "INSERT INTO transaction (senderNum, receiverNum, amount) VALUES (?, ?, ?)";
-        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck);
-             PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
-            pstmtCheck.setInt(1, senderNum);
-            ResultSet rs = pstmtCheck.executeQuery();
-            if (!hasSufficientBalance(senderNum, amount)) {
-                throw new SQLException("Insufficient balance for transaction.");
+    public static String createTransactionAndGetDetails(int senderNum, int receiverNum, int amount) throws SQLException {
+        String senderQuery = "SELECT * FROM account WHERE accountID = ?";
+        String receiverQuery = "SELECT * FROM account WHERE accountID = ?";
+        StringBuilder transactionDetails = new StringBuilder();
+    
+        try (PreparedStatement pstmtSender = conn.prepareStatement(senderQuery);
+             PreparedStatement pstmtReceiver = conn.prepareStatement(receiverQuery)) {
+            
+            // Fetch sender details
+            pstmtSender.setInt(1, senderNum);
+            ResultSet senderResult = pstmtSender.executeQuery();
+            if (senderResult.next()) {
+                transactionDetails.append("Sender:\n");
+                transactionDetails.append("ID: ").append(senderResult.getInt("accountID"))
+                                  .append(", Balance: ").append(senderResult.getInt("balance"))
+                                  .append("\n");
             }
-            pstmtInsert.setInt(1, senderNum);
-            pstmtInsert.setInt(2, receiverNum);
-            pstmtInsert.setInt(3, amount);
-            return pstmtInsert.executeUpdate();
+    
+            // Fetch receiver details
+            pstmtReceiver.setInt(1, receiverNum);
+            ResultSet receiverResult = pstmtReceiver.executeQuery();
+            if (receiverResult.next()) {
+                transactionDetails.append("Receiver:\n");
+                transactionDetails.append("ID: ").append(receiverResult.getInt("accountID"))
+                                  .append(", Balance: ").append(receiverResult.getInt("balance"))
+                                  .append("\n");
+            }
         }
+        return transactionDetails.toString();
     }
-
+    
     // Minimum Balance Check
 
     public static void applyMinimumBalanceFee(int minimumBalance, int fee) throws SQLException {
@@ -434,14 +493,52 @@ public class DatabaseQuery{
 
     // Employee Salary Calculation    
 
-    public static void calculateSalaryIncrement(int employeeID, double incrementFactor) throws SQLException {
+    public static DefaultTableModel calculateSalaryIncrement(int employeeID, double incrementFactor) throws SQLException {
         String sqlUpdate = "UPDATE employee SET salary = salary * ? WHERE employeeID = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
-            pstmt.setDouble(1, incrementFactor);
-            pstmt.setInt(2, employeeID);
-            pstmt.executeUpdate();
+        String sqlFetch = "SELECT employeeID, firstName, lastName, salary FROM employee WHERE employeeID = ?";
+        DefaultTableModel tableModel = new DefaultTableModel();
+    
+        try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate);
+             PreparedStatement pstmtFetch = conn.prepareStatement(sqlFetch)) {
+    
+            // Update the salary
+            pstmtUpdate.setDouble(1, incrementFactor);
+            pstmtUpdate.setInt(2, employeeID);
+            int rowsUpdated = pstmtUpdate.executeUpdate();
+    
+            // If no rows were updated, the employeeID does not exist
+            if (rowsUpdated == 0) {
+                return tableModel; // Return empty table model
+            }
+    
+            // Fetch updated employee record
+            pstmtFetch.setInt(1, employeeID);
+            try (ResultSet rs = pstmtFetch.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+    
+                // Add column names to the table model
+                for (int i = 1; i <= columnCount; i++) {
+                    tableModel.addColumn(metaData.getColumnName(i));
+                }
+    
+                // Add row data to the table model
+                while (rs.next()) {
+                    Object[] row = new Object[columnCount];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getObject(i);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error Calculating Salary Increment: " + e.getMessage());
+            throw e;
         }
+    
+        return tableModel;
     }
+    
 
     // All Accounts with Fraudulent Activity
 
@@ -490,24 +587,74 @@ public class DatabaseQuery{
         return rs;
     }
 
-    // Cards Expiring Soon
+    public static DefaultTableModel getATMsRequiringMaintenance(int branchID) throws SQLException {
+        String sql = "SELECT * FROM atm WHERE branchID = ? AND (maintenanceDate < NOW() OR currentCash < 500)";
+        DefaultTableModel tableModel = new DefaultTableModel();
 
-    public static ResultSet getCardsExpiringSoon(int accountID) throws SQLException {
-        ResultSet rs = null;
-        String SQL = "select * from card inner join BankSystem.account a on card.accountID = a.accountID where expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) and a.accountID = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(SQL);
-            pstmt.setInt(1, accountID);
-            rs = pstmt.executeQuery();
-        } catch (SQLException e) {
-            System.err.println("Error With Expired Cards" + e.getMessage());
-            System.err.println(e.getErrorCode());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, branchID);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+
+                for (int i = 1; i <= columnCount; i++) {
+                    tableModel.addColumn(metaData.getColumnName(i));
+                }
+
+                while (rs.next()) {
+                    Object[] row = new Object[columnCount];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getObject(i);
+                    }
+                    tableModel.addRow(row);
+                }
+            }
         }
 
-        return rs;
+        return tableModel;
     }
 
+    // Cards Expiring Soon
+
+    public static DefaultTableModel getCardsExpiringSoon(int accountID) throws SQLException {
+        String sql = "SELECT * FROM card WHERE accountID = ? AND expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)";
+        DefaultTableModel tableModel = new DefaultTableModel();
+    
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, accountID);
+    
+            try (ResultSet rs = pstmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+    
+                // Add column names to the table model
+                for (int i = 1; i <= columnCount; i++) {
+                    tableModel.addColumn(metaData.getColumnName(i));
+                }
+    
+                // Add rows to the table model
+                while (rs.next()) {
+                    Object[] row = new Object[columnCount];
+                    for (int i = 1; i <= columnCount; i++) {
+                        row[i - 1] = rs.getObject(i);
+                    }
+                    tableModel.addRow(row);
+                }
+                System.out.println("Cards Expiring Soon Query Successful");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error Fetching Cards Expiring Soon: " + e.getMessage());
+            throw e;
+        }
+    
+        return tableModel;
+    }
+    
+
     // Cards Expiring Soon (from any account)
+
+    /*
 
     public static ResultSet getCardsExpiringSoon() throws SQLException {
         ResultSet rs = null;
@@ -522,6 +669,8 @@ public class DatabaseQuery{
 
         return rs;
     }
+
+    */
 
 
     // Update

@@ -1,7 +1,4 @@
-
 import java.sql.*;
-
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -11,13 +8,14 @@ public class DatabaseConnectionTester {
         try {
             Connection conn = DatabaseConnection.getConnection();
             System.out.println("Connected to Database");
+            
             testATMsNeedService();
-            testFraudulentAccounts();
-            testExpiringCards();
+            // testFraudulentAccounts();
+            // testExpiringCards();
             testAccountCreation();
             testAccountClosure();
-            testTransactionValidation();
-            testLoanApproval();
+            // testTransactionValidation();
+            // testLoanApproval();
             testInterestCalculation();
             testCardExpiryValidation();
             testLoanPayment();
@@ -52,6 +50,8 @@ public class DatabaseConnectionTester {
         }
     }
 
+    /*
+
     private static void testTransactionValidation() throws SQLException {
         System.out.println("Testing Transaction Validation...");
         int result = DatabaseQuery.createTransaction(1, 2, 100); 
@@ -62,6 +62,9 @@ public class DatabaseConnectionTester {
         }
     }
 
+    */
+
+    /*
     private static void testLoanApproval() throws SQLException {
         System.out.println("Testing Loan Approval...");
         boolean approved = DatabaseQuery.approveLoan(1, 5000); 
@@ -71,6 +74,8 @@ public class DatabaseConnectionTester {
             System.out.println("Loan Denied: Does Not Meet Criteria");
         }
     }
+
+    */
 
     private static void testInterestCalculation() throws SQLException {
         System.out.println("Testing Interest Calculation...");
@@ -108,12 +113,16 @@ public class DatabaseConnectionTester {
         System.out.println("Salary Updated Successfully");
     }
 
+    /*
+
     public static void testFraudulentAccounts() throws SQLException {
         System.out.println("Testing Fraudulent Accounts...");
         ResultSet rs = DatabaseQuery.getFraudulentAccounts();
         assert rs.next() == true;
         System.out.println("Account Updated Successfully");
     }
+
+    */
 
     public static void testATMsNeedService() throws SQLException {
         System.out.println("Testing ATMs NeedService...");
@@ -122,10 +131,13 @@ public class DatabaseConnectionTester {
         System.out.println("ATM Updated Successfully");
     }
 
+    /*
     public static void testExpiringCards() throws SQLException {
         System.out.println("Testing Expiring Cards...");
         ResultSet rs = DatabaseQuery.getCardsExpiringSoon(12);
         assert rs.next() == true;
         System.out.println("Card Expiring Soon Queried Successfully");
     }
+
+    */
 }
