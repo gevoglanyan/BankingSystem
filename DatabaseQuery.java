@@ -135,31 +135,31 @@ public class DatabaseQuery{
 
     // Loan Approval
 
-    public static boolean approveLoan(int customerID, int loanAmount) throws SQLException {
-        String sqlCheck = "SELECT creditScore, accountHistory FROM customer WHERE customerID = ?";
-        String sqlInsert = "INSERT INTO loan (customerID, amount, status) VALUES (?, ?, 'Approved')";
-        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
-            pstmtCheck.setInt(1, customerID);
-            ResultSet rs = pstmtCheck.executeQuery();
-            if (rs.next()) {
-                int creditScore = rs.getInt("creditScore");
-                int accountHistory = rs.getInt("accountHistory");
-    
-                int creditScoreThreshold = 700; 
-                int accountHistoryThreshold = 2;
-    
-                if (creditScore > creditScoreThreshold && accountHistory > accountHistoryThreshold) {
-                    try (PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
-                        pstmtInsert.setInt(1, customerID);
-                        pstmtInsert.setInt(2, loanAmount);
-                        pstmtInsert.executeUpdate();
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
+//    public static boolean approveLoan(int customerID, int loanAmount) throws SQLException {
+//        String sqlCheck = "SELECT creditScore, accountHistory FROM customer WHERE customerID = ?";
+//        String sqlInsert = "INSERT INTO loan (customerID, amount, status) VALUES (?, ?, 'Approved')";
+//        try (PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
+//            pstmtCheck.setInt(1, customerID);
+//            ResultSet rs = pstmtCheck.executeQuery();
+//            if (rs.next()) {
+//                int creditScore = rs.getInt("creditScore");
+//                int accountHistory = rs.getInt("accountHistory");
+//
+//                int creditScoreThreshold = 700;
+//                int accountHistoryThreshold = 2;
+//
+//                if (creditScore > creditScoreThreshold && accountHistory > accountHistoryThreshold) {
+//                    try (PreparedStatement pstmtInsert = conn.prepareStatement(sqlInsert)) {
+//                        pstmtInsert.setInt(1, customerID);
+//                        pstmtInsert.setInt(2, loanAmount);
+//                        pstmtInsert.executeUpdate();
+//                        return true;
+//                    }
+//                }
+//            }
+//            return false;
+//        }
+//    }
 
     // Loan Payment
 
@@ -171,6 +171,21 @@ public class DatabaseQuery{
             pstmt.setInt(3, loanID);
             pstmt.executeUpdate();
         }
+    }
+
+    // Loan Cancellation
+
+    public static int cancelStudentLoans() throws SQLException {
+        int resultCode = -1;
+        String sqlUpdate = "DELETE FROM loan WHERE loanType = 'student' and loanAmount > 100000";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+            resultCode = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error With Cancel Student Loans Query: " + e.getMessage());
+            System.err.println(e.getErrorCode());
+        }
+
+        return resultCode;
     }
 
     // Interest Calculation
