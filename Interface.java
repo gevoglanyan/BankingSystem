@@ -137,7 +137,6 @@ public class Interface extends JFrame {
         tabbedPane.addTab("Card Management", panel);
     }
     
-    
     private void addSalaryCalculationTab() {
         JPanel panel = createGridBagPanel();
     
