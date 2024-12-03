@@ -97,12 +97,10 @@ public class DatabaseQuery{
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
     
-                // Add column names to the table model
                 for (int i = 1; i <= columnCount; i++) {
                     tableModel.addColumn(metaData.getColumnName(i));
                 }
     
-                // Add rows to the table model
                 while (rs.next()) {
                     Object[] row = new Object[columnCount];
                     for (int i = 1; i <= columnCount; i++) {
@@ -119,7 +117,6 @@ public class DatabaseQuery{
         return tableModel;
     }
     
-
     public static DefaultTableModel transactionsBetweenDates(Timestamp from, Timestamp to) throws SQLException {
         String sql = "SELECT * FROM transaction WHERE transactionDate >= ? AND transactionDate <= ?";
         DefaultTableModel tableModel = new DefaultTableModel();
@@ -132,12 +129,10 @@ public class DatabaseQuery{
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
     
-                // Add column names to the table model
                 for (int i = 1; i <= columnCount; i++) {
                     tableModel.addColumn(metaData.getColumnName(i));
                 }
     
-                // Add rows to the table model
                 while (rs.next()) {
                     Object[] row = new Object[columnCount];
                     for (int i = 1; i <= columnCount; i++) {
@@ -154,7 +149,6 @@ public class DatabaseQuery{
         return tableModel;
     }
     
-
     // Loans
 
     public static ResultSet getLoansFromCustomer(int customerID) throws SQLException{
@@ -457,7 +451,6 @@ public class DatabaseQuery{
         try (PreparedStatement pstmtSender = conn.prepareStatement(senderQuery);
              PreparedStatement pstmtReceiver = conn.prepareStatement(receiverQuery)) {
             
-            // Fetch sender details
             pstmtSender.setInt(1, senderNum);
             ResultSet senderResult = pstmtSender.executeQuery();
             if (senderResult.next()) {
@@ -467,7 +460,6 @@ public class DatabaseQuery{
                                   .append("\n");
             }
     
-            // Fetch receiver details
             pstmtReceiver.setInt(1, receiverNum);
             ResultSet receiverResult = pstmtReceiver.executeQuery();
             if (receiverResult.next()) {
@@ -501,28 +493,23 @@ public class DatabaseQuery{
         try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate);
              PreparedStatement pstmtFetch = conn.prepareStatement(sqlFetch)) {
     
-            // Update the salary
             pstmtUpdate.setDouble(1, incrementFactor);
             pstmtUpdate.setInt(2, employeeID);
             int rowsUpdated = pstmtUpdate.executeUpdate();
     
-            // If no rows were updated, the employeeID does not exist
             if (rowsUpdated == 0) {
-                return tableModel; // Return empty table model
+                return tableModel; 
             }
     
-            // Fetch updated employee record
             pstmtFetch.setInt(1, employeeID);
             try (ResultSet rs = pstmtFetch.executeQuery()) {
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
     
-                // Add column names to the table model
                 for (int i = 1; i <= columnCount; i++) {
                     tableModel.addColumn(metaData.getColumnName(i));
                 }
     
-                // Add row data to the table model
                 while (rs.next()) {
                     Object[] row = new Object[columnCount];
                     for (int i = 1; i <= columnCount; i++) {
@@ -539,7 +526,6 @@ public class DatabaseQuery{
         return tableModel;
     }
     
-
     // All Accounts with Fraudulent Activity
 
     public static ResultSet getFraudulentCustomer() throws SQLException {
@@ -628,12 +614,10 @@ public class DatabaseQuery{
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
     
-                // Add column names to the table model
                 for (int i = 1; i <= columnCount; i++) {
                     tableModel.addColumn(metaData.getColumnName(i));
                 }
     
-                // Add rows to the table model
                 while (rs.next()) {
                     Object[] row = new Object[columnCount];
                     for (int i = 1; i <= columnCount; i++) {
@@ -651,7 +635,6 @@ public class DatabaseQuery{
         return tableModel;
     }
     
-
     // Cards Expiring Soon (from any account)
 
     /*
@@ -671,7 +654,6 @@ public class DatabaseQuery{
     }
 
     */
-
 
     // Update
 

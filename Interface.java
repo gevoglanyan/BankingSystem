@@ -352,6 +352,8 @@ public class Interface extends JFrame {
 
     /* 
 
+    No Need (Was Giving Problems, Switched to Table)
+
     private void displayResultSet(ResultSet rs) throws SQLException {
         StringBuilder sb = new StringBuilder();
         ResultSetMetaData metaData = rs.getMetaData();
