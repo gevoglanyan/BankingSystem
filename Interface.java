@@ -53,7 +53,7 @@ public class Interface extends JFrame {
     
         gbc.gridx = 0;
         gbc.gridy = 0;
-        createCustomerPanel.add(new JLabel("First Name:"), gbc);
+        createCustomerPanel.add(new JLabel("First Name"), gbc);
     
         gbc.gridx = 1;
         JTextField firstNameField = new JTextField();
@@ -62,7 +62,7 @@ public class Interface extends JFrame {
     
         gbc.gridx = 0;
         gbc.gridy = 1;
-        createCustomerPanel.add(new JLabel("Last Name:"), gbc);
+        createCustomerPanel.add(new JLabel("Last Name"), gbc);
     
         gbc.gridx = 1;
         JTextField lastNameField = new JTextField();
@@ -71,7 +71,7 @@ public class Interface extends JFrame {
     
         gbc.gridx = 0;
         gbc.gridy = 2;
-        createCustomerPanel.add(new JLabel("Address:"), gbc);
+        createCustomerPanel.add(new JLabel("Address"), gbc);
     
         gbc.gridx = 1;
         JTextField addressField = new JTextField();
@@ -80,7 +80,7 @@ public class Interface extends JFrame {
     
         gbc.gridx = 0;
         gbc.gridy = 3;
-        createCustomerPanel.add(new JLabel("Email:"), gbc);
+        createCustomerPanel.add(new JLabel("Email"), gbc);
     
         gbc.gridx = 1;
         JTextField emailField = new JTextField();
@@ -89,7 +89,7 @@ public class Interface extends JFrame {
     
         gbc.gridx = 0;
         gbc.gridy = 4;
-        createCustomerPanel.add(new JLabel("Phone Number:"), gbc);
+        createCustomerPanel.add(new JLabel("Phone Number"), gbc);
     
         gbc.gridx = 1;
         JTextField phoneNumberField = new JTextField();
@@ -112,32 +112,45 @@ public class Interface extends JFrame {
             String address = addressField.getText().trim();
             String email = emailField.getText().trim();
             String phoneNumber = phoneNumberField.getText().trim();
-    
+        
             if (firstName.isEmpty() || lastName.isEmpty() || address.isEmpty() || email.isEmpty() || phoneNumber.isEmpty()) {
-                JOptionPane.showMessageDialog(createCustomerPanel, "All fields must be filled.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(createCustomerPanel, "All Fields Must be Filled.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-    
+        
             try {
                 int result = DatabaseQuery.createCustomerQuery(firstName, lastName, address, email, phoneNumber);
                 if (result > 0) {
                     JOptionPane.showMessageDialog(createCustomerPanel, "Customer Created Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-    
+        
                     DefaultTableModel tableModel = DatabaseQuery.getCustomerDetails(email);
+        
+                    int columnIndex = tableModel.findColumn("accountID");
+                    
+                    if (columnIndex != -1) {
+                        tableModel.setColumnCount(tableModel.getColumnCount() - 1);
+                        for (int i = columnIndex; i < tableModel.getColumnCount(); i++) {
+                            for (int j = 0; j < tableModel.getRowCount(); j++) {
+                                tableModel.setValueAt(tableModel.getValueAt(j, i + 1), j, i);
+                            }
+                        }
+                    }
+        
                     resultTable.setModel(tableModel);
-    
+        
                     firstNameField.setText("");
                     lastNameField.setText("");
                     addressField.setText("");
                     emailField.setText("");
                     phoneNumberField.setText("");
                 } else {
-                    JOptionPane.showMessageDialog(createCustomerPanel, "Failed to Create Customer. Email might already exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(createCustomerPanel, "Failed to Create Customer. Email Might Already Exist.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (SQLException ex) {
                 showError("Error Creating Customer", ex);
             }
         });
+        
     
         createCustomerPanel.add(submitButton, gbc);
     
@@ -180,7 +193,7 @@ public class Interface extends JFrame {
                 int branchID = Integer.parseInt(branchIDField.getText());
                 DefaultTableModel tableModel = DatabaseQuery.getATMsRequiringMaintenance(branchID);
                 if (tableModel.getRowCount() == 0) {
-                    JOptionPane.showMessageDialog(panel, "No ATMs require maintenance for Branch ID " + branchID);
+                    JOptionPane.showMessageDialog(panel, "No ATMs Require Maintenance for Branch ID " + branchID);
                 } else {
                     resultTable.setModel(tableModel);
                 }
@@ -209,7 +222,7 @@ public class Interface extends JFrame {
         fetchButton.addActionListener(e -> {
             String input = accountIDField.getText();
             if (input.isEmpty()) {
-                JOptionPane.showMessageDialog(panel, "Please enter an Account ID.");
+                JOptionPane.showMessageDialog(panel, "Please Enter an Account ID.");
                 return;
             }
     
@@ -217,7 +230,7 @@ public class Interface extends JFrame {
                 int accountID = Integer.parseInt(input);
                 DefaultTableModel tableModel = DatabaseQuery.getCardsExpiringSoon(accountID);
                 if (tableModel.getRowCount() == 0) {
-                    JOptionPane.showMessageDialog(panel, "No cards are expiring soon for Account ID " + accountID);
+                    JOptionPane.showMessageDialog(panel, "No Cards are Expiring Soon for Account ID " + accountID);
                 } else {
                     resultTable.setModel(tableModel); 
                 }
@@ -361,8 +374,8 @@ public class Interface extends JFrame {
     private void addTransactionQueryTab() {
         JPanel panel = createGridBagPanel();
 
-        JLabel startDateLabel = new JLabel("Start Date:");
-        JLabel endDateLabel = new JLabel("End Date:");
+        JLabel startDateLabel = new JLabel("Start Date");
+        JLabel endDateLabel = new JLabel("End Date");
 
         UtilDateModel startModel = new UtilDateModel();
         UtilDateModel endModel = new UtilDateModel();
@@ -390,7 +403,7 @@ public class Interface extends JFrame {
             java.util.Date endDate = (java.util.Date) endDatePicker.getModel().getValue();
 
             if (startDate == null || endDate == null) {
-                JOptionPane.showMessageDialog(panel, "Please select both start and end dates.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(panel, "Please Select Both Start and End Dates.", "Input Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -401,7 +414,7 @@ public class Interface extends JFrame {
                 DefaultTableModel tableModel = DatabaseQuery.transactionsBetweenDates(startTimestamp, endTimestamp);
 
                 if (tableModel.getRowCount() == 0) {
-                    JOptionPane.showMessageDialog(panel, "No transactions found for the selected date range.");
+                    JOptionPane.showMessageDialog(panel, "No Transactions Found for the Selected Date Range.");
                 } else {
                     resultTable.setModel(tableModel);
                 }

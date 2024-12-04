@@ -11,22 +11,22 @@ public class Employee {
 
     public Employee(ResultSet rs) throws SQLException {
         if(rs.next()) {
-            branchID = rs.getInt("branchID");
-            firstName = rs.getString("firstName");
-            lastName = rs.getString("lastName");
-            role = rs.getString("role");
-            dateHired = rs.getTimestamp("dateHired");
+            branchID = rs.getInt("Branch ID");
+            firstName = rs.getString("First Name");
+            lastName = rs.getString("Last Name");
+            role = rs.getString("Role");
+            dateHired = rs.getTimestamp("Date Hired");
         }
     }
 
     @Override
     public String toString() {
-        return "Employee{" +
-                "branchID=" + branchID +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", role='" + role + '\'' +
-                ", dateHired=" + dateHired +
+        return "Employee {" +
+                "Branch ID=" + branchID +
+                ", First Name='" + firstName + '\'' +
+                ", Last Name='" + lastName + '\'' +
+                ", Role='" + role + '\'' +
+                ", DateH ired=" + dateHired +
                 '}';
     }
 }

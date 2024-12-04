@@ -11,24 +11,24 @@ public class Customer {
 
     public Customer(ResultSet rs) throws SQLException {
         if(rs.next()) {
-            customerID = rs.getInt("customerID");
-            firstName = rs.getString("firstName");
-            lastName = rs.getString("lastName");
-            address = rs.getString("address");
-            email = rs.getString("email");
-            phoneNumber = rs.getString("phoneNumber");
+            customerID = rs.getInt("Customer ID");
+            firstName = rs.getString("First Name");
+            lastName = rs.getString("Last Name");
+            address = rs.getString("Address");
+            email = rs.getString("Email");
+            phoneNumber = rs.getString("Phone Number");
         }
     }
 
     @Override
     public String toString() {
-        return "Customer{" +
-                "customerID=" + customerID +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", address='" + address + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
+        return "Customer {" +
+                "Customer ID=" + customerID +
+                ", First Name='" + firstName + '\'' +
+                ", Last Name='" + lastName + '\'' +
+                ", Address='" + address + '\'' +
+                ", Email='" + email + '\'' +
+                ", Phone Number='" + phoneNumber + '\'' +
                 '}';
     }
 }

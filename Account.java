@@ -18,32 +18,32 @@ public class Account {
 
     public Account(ResultSet rs) throws SQLException {
         if(rs.next()) {
-            accountID = rs.getInt("accountID");
-            accountNum = rs.getInt("accountNum");
-            accountType = matchAccountType(rs.getString("accountType"));
-            balance = rs.getInt("balance");
-            customerID = rs.getInt("customerID");
+            accountID = rs.getInt("Account ID");
+            accountNum = rs.getInt("Account Number");
+            accountType = matchAccountType(rs.getString("Account Type"));
+            balance = rs.getInt("Balance");
+            customerID = rs.getInt("Customer ID");
         }
     }
 
     private AccountType matchAccountType(String accountType) {
         return switch (accountType) {
-            case "checkings" -> AccountType.Checkings;
-            case "savings" -> AccountType.Savings;
-            case "credit card" -> AccountType.CreditCard;
-            case "loan" -> AccountType.Loan;
+            case "Checkings" -> AccountType.Checkings;
+            case "Savings" -> AccountType.Savings;
+            case "Credit Card" -> AccountType.CreditCard;
+            case "Loan" -> AccountType.Loan;
             default -> AccountType.Invalid;
         };
     }
 
     @Override
     public String toString() {
-        return "Account{" +
-                "accountID=" + accountID +
-                ", accountNum=" + accountNum +
-                ", accountType=" + accountType +
-                ", balance=" + balance +
-                ", customerID=" + customerID +
+        return "Account {" +
+                "Account ID=" + accountID +
+                ", Account Number=" + accountNum +
+                ", Account Type=" + accountType +
+                ", Balance=" + balance +
+                ", Customer ID=" + customerID +
                 '}';
     }
 }

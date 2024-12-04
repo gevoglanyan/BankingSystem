@@ -12,24 +12,24 @@ public class ATM {
 
     public ATM(ResultSet rs) throws SQLException {
         if (rs.next()) {
-            branchID = rs.getInt("branchID");
-            currentCash = rs.getInt("currentCash");
-            maxCash = rs.getInt("maxCash");
-            atmID = rs.getInt("atmID");
-            location = rs.getString("location");
-            maintenanceDate = rs.getTimestamp("maintenanceDate");
+            branchID = rs.getInt("Branch ID");
+            currentCash = rs.getInt("Current Cash");
+            maxCash = rs.getInt("Max Cash");
+            atmID = rs.getInt("ATM ID");
+            location = rs.getString("Location");
+            maintenanceDate = rs.getTimestamp("Maintenance Date");
         }
     }
 
     @Override
     public String toString() {
-        return "ATM{" +
-                "branchID=" + branchID +
-                ", currentCash=" + currentCash +
-                ", maxCash=" + maxCash +
-                ", atmID=" + atmID +
-                ", location='" + location + '\'' +
-                ", maintenanceDate=" + maintenanceDate +
+        return "ATM {" +
+                "Branch ID=" + branchID +
+                ", Current Cash=" + currentCash +
+                ", Max Cash=" + maxCash +
+                ", ATM ID=" + atmID +
+                ", Location='" + location + '\'' +
+                ", Maintenance Date=" + maintenanceDate +
                 '}';
     }
 }

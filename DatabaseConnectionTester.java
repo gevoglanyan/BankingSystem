@@ -9,13 +9,14 @@ public class DatabaseConnectionTester {
             Connection conn = DatabaseConnection.getConnection();
             System.out.println("Connected to Database");
             
-            testATMsNeedService();
             // testFraudulentAccounts();
             // testExpiringCards();
-            testAccountCreation();
-            testAccountClosure();
             // testTransactionValidation();
             // testLoanApproval();
+
+            testATMsNeedService();
+            testAccountCreation();
+            testAccountClosure();
             testInterestCalculation();
             testCardExpiryValidation();
             testLoanPayment();
@@ -61,8 +62,6 @@ public class DatabaseConnectionTester {
             System.out.println("Transaction Failed: Insufficient Balance or Invalid Accounts");
         }
     }
-
-    */
 
     /*
     private static void testLoanApproval() throws SQLException {

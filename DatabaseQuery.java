@@ -23,8 +23,6 @@ public class DatabaseQuery{
         return conn;
     }
 
-    // Customer
-
     public static ResultSet getCustomerByEmail(String email) throws SQLException {
         ResultSet rs = null;
         String sql = "SELECT * FROM customer WHERE email = ?";
@@ -86,8 +84,6 @@ public class DatabaseQuery{
         return rs;
     }
 
-    // Account
-
     public static ResultSet getAccountByCustomerID(int customerID) throws SQLException {
         ResultSet rs = null;
         String sql = "SELECT * FROM account WHERE customerID = ?";
@@ -115,8 +111,6 @@ public class DatabaseQuery{
         }
         return rs;
     }
-
-    // Transactions
 
     public static DefaultTableModel transactionsRelatedToAccount(int accountNumber) throws SQLException {
         String sql = "SELECT * FROM transaction WHERE senderNum = ? OR receiverNum = ?";
@@ -182,8 +176,6 @@ public class DatabaseQuery{
         return tableModel;
     }
     
-    // Loans
-
     public static ResultSet getLoansFromCustomer(int customerID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM loan WHERE customerID = ?";
@@ -198,8 +190,6 @@ public class DatabaseQuery{
         }
         return rs;
     }
-
-    // Loan Approval
 
     /*
 
@@ -233,8 +223,6 @@ public class DatabaseQuery{
 
     */
 
-    // Loan Payment
-
     public static void makeLoanPayment(int loanID, int paymentAmount) throws SQLException {
         String sqlUpdate = "UPDATE loan SET balance = balance - ?, paymentHistory = CONCAT(paymentHistory, ?) WHERE loanID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
@@ -244,8 +232,6 @@ public class DatabaseQuery{
             pstmt.executeUpdate();
         }
     }
-
-    // Loan Cancellation
 
     public static int cancelStudentLoans() throws SQLException {
         int resultCode = -1;
@@ -260,8 +246,6 @@ public class DatabaseQuery{
         return resultCode;
     }
 
-    // Interest Calculation
-
     public static void calculateInterest(double interestRate) throws SQLException {
         String sqlUpdate = "UPDATE account SET balance = balance + (balance * ?) WHERE accountType = 'Savings'";
         try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdate)) {
@@ -269,8 +253,6 @@ public class DatabaseQuery{
             pstmtUpdate.executeUpdate();
         }
     }
-
-    // Branch
 
     public static ResultSet getEmployeeFromBranch(int branchID) throws SQLException{
         ResultSet rs = null;
@@ -302,8 +284,6 @@ public class DatabaseQuery{
         return rs;
     }
 
-    // Branch Transfer
-
     public static void transferEmployee(int employeeID, int newBranchID) throws SQLException {
         String sqlUpdate = "UPDATE employee SET branchID = ? WHERE employeeID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
@@ -312,8 +292,6 @@ public class DatabaseQuery{
             pstmt.executeUpdate();
         }
     }
-
-    //Employee
 
     public static ResultSet getEmployeeFromRole(String role) throws SQLException{
         ResultSet rs = null;
@@ -345,8 +323,6 @@ public class DatabaseQuery{
         return rs;
     }
 
-    // Atm
-
     public static ResultSet getATMFromBranch(int branchID) throws SQLException{
         ResultSet rs = null;
         String sql = "SELECT * FROM atm WHERE branchID = ?";
@@ -375,8 +351,6 @@ public class DatabaseQuery{
         }
         return rs;
     }
-
-    // Card
 
     public static ResultSet getCardFromAccountID(int accountID) throws SQLException{
         ResultSet rs = null;
@@ -409,8 +383,6 @@ public class DatabaseQuery{
         return rs;
     }
 
-    // Card Expiry Validation
-
     public static boolean validateCard(int cardID) throws SQLException {
         String sql = "SELECT expDate FROM card WHERE cardID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -424,8 +396,6 @@ public class DatabaseQuery{
         }
     }
  
-    // Utility Functions
-
     public static int createCustomerQuery(String firstName, String lastName, String address, String email, String phoneNumber) throws SQLException {
         int resultCode = -1;
         boolean exists = checkIfEmailExists(email);
@@ -473,8 +443,6 @@ public class DatabaseQuery{
         }
         return exists;
     }
-
-    // Transaction Validation
 
     public static DefaultTableModel createTransactionAndGetDetails(int senderNum, int receiverNum, int amount) throws SQLException {
         String deductBalanceQuery = "UPDATE account SET balance = balance - ? WHERE accountID = ?";
@@ -538,8 +506,6 @@ public class DatabaseQuery{
         return tableModel;
     }
     
-    // Minimum Balance Check
-
     public static void applyMinimumBalanceFee(int minimumBalance, int fee) throws SQLException {
         String sqlUpdate = "UPDATE account SET balance = balance - ? WHERE balance < ? AND accountType = 'Savings'";
         try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
@@ -548,8 +514,6 @@ public class DatabaseQuery{
             pstmt.executeUpdate();
         }
     }
-
-    // Employee Salary Calculation    
 
     public static DefaultTableModel calculateSalaryIncrement(int employeeID, double incrementFactor) throws SQLException {
         String sqlUpdate = "UPDATE employee SET salary = salary * ? WHERE employeeID = ?";
@@ -591,8 +555,6 @@ public class DatabaseQuery{
     
         return tableModel;
     }
-    
-    // All Accounts with Fraudulent Activity
 
     public static ResultSet getFraudulentCustomer() throws SQLException {
         ResultSet rs = null;
@@ -608,8 +570,6 @@ public class DatabaseQuery{
         return rs;
     }
 
-    // ATMs Requiring Maintenance
-
     public static ResultSet getATMSNeedService(int branchID) throws SQLException {
         ResultSet rs = null;
         String sql = "select * from atm where (maintenanceDate < DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY) or currentCash < 500) and branchID = ?";
@@ -623,8 +583,6 @@ public class DatabaseQuery{
         }
         return rs;
     }
-
-    // ATMs Requiring Maintenance (from any branch)
 
     public static ResultSet getATMSNeedService() throws SQLException {
         ResultSet rs = null;
@@ -667,8 +625,6 @@ public class DatabaseQuery{
         return tableModel;
     }
 
-    // Cards Expiring Soon
-
     public static DefaultTableModel getCardsExpiringSoon(int accountID) throws SQLException {
         String sql = "SELECT * FROM card WHERE accountID = ? AND expDate <= DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY)";
         DefaultTableModel tableModel = new DefaultTableModel();
@@ -700,8 +656,6 @@ public class DatabaseQuery{
     
         return tableModel;
     }
-    
-    // Cards Expiring Soon (from any account)
 
     /*
 
@@ -720,8 +674,6 @@ public class DatabaseQuery{
     }
 
     */
-
-    // Update
 
     public static int updateCustomer(String firstName, String lastName, String address, String email, String phoneNumber, int customerID) throws SQLException {
         int rs = -1;
@@ -754,6 +706,7 @@ public class DatabaseQuery{
     }
 
     /* 
+
     public static int createAccountForCustomer(String firstName, String lastName){
         int resultCode = -1;
         String sql = String.format("INSERT INTO customer (firstName, lastName, Address, email, phoneNumber) VALUES ('%s', '%s', '%s', '%s', '%s')",firstName, lastName, address, email, phoneNumber);
@@ -766,9 +719,8 @@ public class DatabaseQuery{
        }
        return resultCode;
     }
-    */
 
-    // Account Creation
+    */
 
     public static int createAccount(int customerID, String accountType) throws SQLException {
         String sqlCheck = "SELECT COUNT(*) FROM account WHERE customerID = ?";
@@ -787,8 +739,6 @@ public class DatabaseQuery{
             return pstmtInsert.executeUpdate();
         }
     }
-
-    // Close Account
 
     public static int closeAccount(int accountID) throws SQLException {
         String sqlCheck = "SELECT balance, (SELECT COUNT(*) FROM loan WHERE accountID = ? AND status = 'Pending') AS loans FROM account WHERE accountID = ?";

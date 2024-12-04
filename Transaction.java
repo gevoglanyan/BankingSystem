@@ -9,7 +9,6 @@ enum TransactionType {
 }
 
 public class Transaction {
-
     int senderNum;
     int receiverNum;
     Timestamp transactionDate;
@@ -19,31 +18,31 @@ public class Transaction {
 
     public Transaction(ResultSet rs) throws SQLException {
         if(rs.next()){
-            senderNum = rs.getInt("senderNum");
-            receiverNum = rs.getInt("receiverNum");
-            transactionDate = rs.getTimestamp("transactionDate");
-            amount = rs.getInt("amount");
-            transactionType = matchTransactionType(rs.getString("transactionType"));
-            transactionID = rs.getInt("transactionID");
+            senderNum = rs.getInt("Sender Number");
+            receiverNum = rs.getInt("Receiver Number");
+            transactionDate = rs.getTimestamp("Transaction Date");
+            amount = rs.getInt("Amount");
+            transactionType = matchTransactionType(rs.getString("Transaction Type"));
+            transactionID = rs.getInt("Transaction ID");
         }
     }
 
     @Override
     public String toString() {
-        return "Transaction{" +
-                "senderNum=" + senderNum +
-                ", receiverNum=" + receiverNum +
-                ", transactionDate=" + transactionDate +
-                ", amount=" + amount +
-                ", transactionType=" + transactionType +
-                ", transactionID=" + transactionID +
+        return "Transaction {" +
+                "Sender Number=" + senderNum +
+                ", Receiver Number=" + receiverNum +
+                ", Transaction Date=" + transactionDate +
+                ", Amount=" + amount +
+                ", Transaction Type=" + transactionType +
+                ", Transaction ID=" + transactionID +
                 '}';
     }
 
     private TransactionType matchTransactionType(String transactionType){
         return switch (transactionType){
-            case "loan" -> TransactionType.Loan;
-            case "wire" -> TransactionType.Wire;
+            case "Loan" -> TransactionType.Loan;
+            case "Wire" -> TransactionType.Wire;
             default -> TransactionType.Invalid;
         };
     }

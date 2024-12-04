@@ -19,32 +19,32 @@ public class Loan {
 
     public Loan(ResultSet rs) throws SQLException {
         if(rs.next()) {
-            customerID = rs.getInt("customerID");
-            loanType = matchLoanType(rs.getString("loanType"));
-            loanID = rs.getInt("loanID");
-            loanStatus = rs.getInt("loanStatus");
-            loanAmount = rs.getInt("loanAmount");
+            customerID = rs.getInt("Customer ID");
+            loanType = matchLoanType(rs.getString("Loan Type"));
+            loanID = rs.getInt("Loan ID");
+            loanStatus = rs.getInt("Loan Status");
+            loanAmount = rs.getInt("Loan Amount");
         }
     }
 
     @Override
     public String toString() {
-        return "Loan{" +
-                "customerID=" + customerID +
-                ", loanType=" + loanType +
-                ", loanID=" + loanID +
-                ", loanStatus=" + loanStatus +
-                ", loanAmount=" + loanAmount +
+        return "Loan {" +
+                "Customer ID=" + customerID +
+                ", Loan Type=" + loanType +
+                ", Loan ID=" + loanID +
+                ", Loan Status=" + loanStatus +
+                ", Loan Amount=" + loanAmount +
                 '}';
     }
 
     private LoanType matchLoanType(String loanType){
         return switch (loanType) {
-            case "mortgage" -> LoanType.Mortgage;
-            case "credit" -> LoanType.Credit;
-            case "vehicle" -> LoanType.Vehicle;
-            case "student" -> LoanType.Student;
-            case "business" -> LoanType.Business;
+            case "Mortgage" -> LoanType.Mortgage;
+            case "Credit" -> LoanType.Credit;
+            case "Vehicle" -> LoanType.Vehicle;
+            case "Student" -> LoanType.Student;
+            case "Business" -> LoanType.Business;
             default -> LoanType.Invalid;
         };
     }

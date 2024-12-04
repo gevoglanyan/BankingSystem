@@ -17,30 +17,30 @@ public class Card {
 
     public Card(ResultSet rs) throws SQLException {
         if(rs.next()){
-            cardType = matchCardType(rs.getString("cardType"));
-            expDate = rs.getTimestamp("expDate");
-            cvv = rs.getInt("cvv");
-            cardNum = rs.getInt("cardNum");
-            accountID = rs.getInt("accountID");
+            cardType = matchCardType(rs.getString("Card Type"));
+            expDate = rs.getTimestamp("Expiration Date");
+            cvv = rs.getInt("CVV");
+            cardNum = rs.getInt("Card Number");
+            accountID = rs.getInt("Account ID");
         }
     }
 
     private CardType matchCardType(String cardType){
         return switch (cardType) {
-            case "checking" -> CardType.Checking;
-            case "credit" -> CardType.Credit;
+            case "Checking" -> CardType.Checking;
+            case "Credit" -> CardType.Credit;
             default -> CardType.Invalid;
         };
     }
 
     @Override
     public String toString() {
-        return "Card{" +
-                "cardType=" + cardType +
-                ", expDate=" + expDate +
-                ", cvv=" + cvv +
-                ", cardNum=" + cardNum +
-                ", accountID=" + accountID +
+        return "Card {" +
+                "Card Type=" + cardType +
+                ", Expiration Date=" + expDate +
+                ", CVV=" + cvv +
+                ", Card Number=" + cardNum +
+                ", Account ID=" + accountID +
                 '}';
     }
 }

@@ -1,5 +1,7 @@
 import java.sql.*;
 
+// This File Serves No Purpose at the Moment
+
 @SuppressWarnings("unused")
 public class DataInserter {
     public static void main(String[] args) {
