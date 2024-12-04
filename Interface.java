@@ -103,7 +103,7 @@ public class Interface extends JFrame {
     
         JTable resultTable = new JTable(); 
         JScrollPane resultScrollPane = new JScrollPane(resultTable);
-        resultScrollPane.setPreferredSize(new Dimension(800, 300)); 
+        resultScrollPane.setPreferredSize(new Dimension(700, 300)); 
         resultScrollPane.setBorder(BorderFactory.createEmptyBorder());
     
         submitButton.addActionListener(e -> {
