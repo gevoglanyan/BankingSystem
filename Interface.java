@@ -151,7 +151,6 @@ public class Interface extends JFrame {
             }
         });
         
-    
         createCustomerPanel.add(submitButton, gbc);
     
         gbc.gridx = 0;
@@ -274,8 +273,12 @@ public class Interface extends JFrame {
             try {
                 int employeeID = Integer.parseInt(employeeIDField.getText());
                 double incrementFactor = Double.parseDouble(incrementFactorField.getText());
-    
 
+                if (incrementFactor <= 0) {
+                    JOptionPane.showMessageDialog(panel, "Increment Factor Can't Be Negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+    
                 DefaultTableModel tableModel = DatabaseQuery.calculateSalaryIncrement(employeeID, incrementFactor);
     
                 if (tableModel.getRowCount() == 0) {
@@ -332,6 +335,11 @@ public class Interface extends JFrame {
                 int senderID = Integer.parseInt(senderIDField.getText());
                 int receiverID = Integer.parseInt(receiverIDField.getText());
                 int amount = Integer.parseInt(amountField.getText());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(panel, "Amount Can't Be Negative.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
     
                 DefaultTableModel tableModel = DatabaseQuery.createTransactionAndGetDetails(senderID, receiverID, amount);
     
